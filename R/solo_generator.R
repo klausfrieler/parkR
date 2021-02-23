@@ -15,7 +15,7 @@ sample_iois <- function(size = 10, start = 1){
     return(ret+3)
   }
   for(i in 2:size){
-    ret[i] <- succ_ioiclass %>%
+    ret[i] <- sologenerator::succ_ioiclass %>%
       filter(value == ret[i - 1]) %>%
       sample_n(1, replace = T) %>%
       pull(successor)
@@ -292,10 +292,10 @@ generate_phrase_over_chords <- function(lead_sheet,
                                         min_len = 2,
                                         max_len = 10){
   if(mlu == "line"){
-    len <- length_dist %>% filter(n > 5)  %>% sample_n(1) %>% pull(n)
+    len <- sologenerator::length_dist %>% filter(n > 5)  %>% sample_n(1) %>% pull(n)
   }
   else{
-    len <- length_dist %>% filter(n < 10)  %>% sample_n(1) %>% pull(n)
+    len <- sologenerator::length_dist %>% filter(n < 10)  %>% sample_n(1) %>% pull(n)
   }
   len <- min(max_len, max(min_len, len))
   ret <- list()
@@ -350,7 +350,7 @@ generate_phrase_over_chords <- function(lead_sheet,
       if(j > 100){
         stop("Infinite loop in generate")
       }
-      candidate <- successor_dist %>%
+      candidate <- sologenerator::successor_dist %>%
         filter(type == last$type,
                direction == direction) %>%
         sample_n(1, replace=T)

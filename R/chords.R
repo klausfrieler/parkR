@@ -451,11 +451,11 @@ unroll_durations <- function(durations){
 #' @export
 create_from_irb <- function(compid, name = NULL, with_form = F){
   if(is.character(compid)){
-    sheet <- irb[irb$title == compid,] %>%
+    sheet <- sologenerator::irb[tolower(sologenerator::irb$title) == tolower(compid),] %>%
       select(chord, duration, section, title, time, composer, date, compid, key)
   }
   else {
-    sheet <- irb[irb$compid == compid,] %>% select(chord, duration, title, time)
+    sheet <- sologenerator::irb[sologenerator::irb$compid == compid,] %>% select(chord, duration, title, time)
   }
   time <- strsplit(sheet$time[1], "/")[[1]]
   period <- as.integer(time[1])
