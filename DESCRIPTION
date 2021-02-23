@@ -1,0 +1,23 @@
+Package: sologenerator
+Type: Package
+Title: Generate monophonic jazz solos for chord sequences
+Version: 0.1.0
+Author: Klaus Frieler
+Maintainer: Klaus Frieler <kf@omniversum.de>
+Description: Generates jazz solos using Weimar Bebop Alphabet atoms and midlevel units based on the Weimar Jazz Database.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 3.5.0),
+Imports:
+    tidyverse (>= 1.2.1),
+    ggplot2,
+    dplyr,
+    tibble,
+    purrr,
+    stringr,
+    stats
+Suggests:
+    devtools (>= 1.13.6)
+RoxygenNote: 7.1.1
