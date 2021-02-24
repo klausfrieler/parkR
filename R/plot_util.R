@@ -85,29 +85,53 @@ pitch_plot <- function(pitch_vec){
   q
 }
 
-piano_roll <- function(tbl){
-  if(get_format(tbl) != "mcsv2"){
+#' piano_roll
+#'
+#' This function produces a piano roll of a colo
+#'
+#' @param solo (solo data frame) MCSV2 formatted solo data.frame
+#' @param by_chorus (logical scalar) Flag to add chorus facets
+#' @export
+piano_roll <- function(solo, by_chorus = T){
+  if(sologenerator:::get_format(solo) != "mcsv2"){
     messagef("Warning: piano_roll plot only for mcsv2 data")
     return(NULL)
   }
-  q <- ggplot(tbl,
-             aes(x = onset, y = pitch, colour = factor(phrase_id %% 2)))
-
+  q <- ggplot(solo, aes(x = onset, y = pitch, colour = factor(phrase_id %% 2)))
   q <- q + geom_point()
   q <- q + geom_line(aes(group = factor(phrase_id)))
   q <- q + get_default_theme()
+  if(by_chorus){
+    q <- q + facet_wrap(~chorus_id, ncol = 1, scale = "free_x")
+  }
   q
 
 }
-
-cpc_plot2 <- function(tbl){
-  tbl$cpc <- (tbl$pitch - parse_chord(tbl$chord)$pc) %% 12
-  q<- ggplot(tbl,
-             aes(x = factor(cpc, levels = 0:11, labels = 0:11), y = ..count..))
+#' cpc_plot_solo
+#'
+#' This function produces a barplot of CPC values from a solo (MCSV2) data frame
+#'
+#' @param solo (solo data frame) MCSV2 formatted solo data.frame
+#' @param by_chord (logical scalar) Flag to add chord facets
+#' @export
+cpc_plot_solo <- function(solo, by_chord = T){
+  if(get_format(solo) != "mcsv2"){
+    messagef("Warning: piano_roll plot only for mcsv2 data")
+    return(NULL)
+  }
+  if(!("cpc" %in% names(solo))){
+    solo  <- solo %>%
+      mutate(cpc = (pitch - sologenerator:::parse_chord(chord)$pc) %% 12)
+  }
+  solo <- solo %>% mutate(cpc = factor(cpc, levels = 0:11, labels = 0:11))
+  q<- ggplot(solo, aes(x = cpc, y = ..count..))
 
   q <- q + geom_bar(fill = default_color)
-  q <- q + scale_x_discrete(drop=F)
+  q <- q + scale_x_discrete(drop = F)
   q <- q + get_default_theme()
+  if(by_chord){
+    q <- q + facet_wrap(~chord, scale = "free")
+  }
   q
 }
 

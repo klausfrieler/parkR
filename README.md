@@ -14,11 +14,11 @@ The WBA-MLA Solo Generator is a small tool that is able to generate monophonic j
 
 3. Install the ‘devtools’ package with the following command:
 
-`install.packages('sologenerator')`
+`install.packages('devtools')`
 
 4. Install the WBA-MLA Solo Generator:
 
-`devtools::install_github('klausfrieler/sologenerator')`
+`devtools::install_github('nn/sologenerator')`
 
 ## Usage
 

@@ -286,8 +286,13 @@ get_iois_and_mpos <- function(pitches, start_ticks, mlu){
     iois <- tmp$iois
   }
   else{
-    line_dur <- ifelse(stats::runif(1) < .5, 1, 2)
+    line_dur <- ifelse(stats::runif(1) < .75, 1, 2)
     iois <- as.integer(rep(line_dur, length(pitches)))
+    if(line_dur == 2){
+      if(start_ticks %% 2 == 1){
+        iois[1] <- 1
+      }
+    }
   }
   if(length(iois) == 1){
     mpos <- start_ticks
@@ -458,7 +463,7 @@ generate_solo <- function(lead_sheet,
     phrase_break <- sample(0:15, 1)
     current_ticks <- current_ticks + sum(ret[[phrase_id]]$iois) + phrase_break
     current_chorus_id <- floor(current_ticks/max_chorus_ticks) + 1
-    printf("Current ticks %d (max %d, chorus %d), current chorus: %d", current_ticks, max_ticks, max_chorus_ticks, current_chorus_id)
+    #printf("Current ticks %d (max %d, chorus %d), current chorus: %d", current_ticks, max_ticks, max_chorus_ticks, current_chorus_id)
     phrase_id <- phrase_id + 1
   }
   bind_rows(ret) %>% set_format("solo_df") %>% filter(mpos <= max_ticks)

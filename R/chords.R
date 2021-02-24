@@ -208,6 +208,15 @@ split_by_note_name <- function(chord_label){
   purrr::map2_chr(start, end, function(x, y) substr(chord_label, x, y))
 }
 
+#' parse_chord
+#'
+#' This function parses a chord label into its constituents
+#'
+#' @param chord_label (character vector) chord labels to parse
+#' @return data frame with columns \code{root} (tone name), \code{type} (basic chord type), \code{pc} (pitch class of root),
+#' \code{bass} (extra bass note by slash chord), \code{bass_pc} (pitch class of ),
+#' \code{ext} (string of comma separated extensions)
+#' @export
 parse_chord <- function(chord_label){
   type <- NA
   if(length(chord_label) > 1 ){
