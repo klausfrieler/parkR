@@ -414,23 +414,24 @@ generate_phrase_over_chords <- function(lead_sheet,
   bind_rows(ret)
 }
 
-#' generate_chorus
+#' generate_solo
 #'
-#' This function generaties one chorus for a given lead sheet
+#' This function generaties a solo for a given lead sheet
 #'
 #' @param lead_sheet (data frame) Lead sheet
 #' @param pitch_range (Integer vector of length 2) Minimum and maximum MIDI pitch for solo generation.
+#' @param n_chorus (Integer scalar) Number of choruses to generate.
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.
 #' @param lick_to_line_ratio (double scalar) Ratio of licks to lines
 #' @param excludes (character vector) List of WBA atoms not to use during generation
 #' @return A solo data frame
 #' @export
-generate_chorus <- function(lead_sheet,
-                            n_chorus = 1,
-                            pitch_range = c(48, 84),
-                            tempo = 120,
-                            lick_to_line_ratio = .5,
-                            excludes = NULL){
+generate_solo <- function(lead_sheet,
+                          n_chorus = 1,
+                          pitch_range = c(48, 84),
+                          tempo = 120,
+                          lick_to_line_ratio = .5,
+                          excludes = NULL){
   start_mpos = 0
   ret <- list()
   current_ticks <- sample(0:7, 1)

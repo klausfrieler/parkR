@@ -36,13 +36,13 @@ The last line writes the solo as an MCSV2 file `blues.csv`in the workind directo
 can converted to MIDI or Lilypond/PDF using the MeloSpyGUI, which
 is freely available on the [Jazzomat Website](https://jazzomat.hfm-weimar.de/download/download.html)
 
-More lead sheets can be found in the irb and wjd_chord_db data sets, incorporated in the package. For example, to generate a solo over "All The Things You Are" you can use (usingthe tidyverse)
+More lead sheets can be found in the irb and wjd_chord_db data sets, incorporated in the package. For example, to generate a solo with two choruses over "All The Things You Are" you can use
 
 ```
   library(tidyverse)
   library(sologenerator)
   create_from_irb("All the things you are") %>% 
-    generate_chorus() %>% 
-    chorus_to_mcsv2() %>%  
+    generate_solo(n_chorus = 2) %>% 
+    solo_to_mcsv2() %>%  
     write_mcsv2("all_the_things_you_are.csv")
 ```

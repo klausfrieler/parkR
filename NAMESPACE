@@ -3,7 +3,7 @@
 export(chorus_to_mcsv2)
 export(create_from_irb)
 export(create_sheet)
-export(generate_chorus)
+export(generate_solo)
 export(make_many_solos)
 export(phrase_to_mcsv2)
 export(solo_to_mcsv2)
