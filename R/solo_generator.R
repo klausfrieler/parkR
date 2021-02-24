@@ -42,6 +42,7 @@ phrase_to_mcsv2 <- function(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 
     beat = as.integer(floor(phrase_tbl$mpos / 4) %% 4) + 1,
     tatum = as.integer(phrase_tbl$mpos %%4) + 1
   )
+
   T <- 60/tempo
   final$beat_duration <- T
   final$division <- 4
@@ -51,7 +52,7 @@ phrase_to_mcsv2 <- function(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 
   final$phrase_begin <- 0
   final$phrase_begin[1] <- 1
   final$chorus_id <- chorus_id
-  final$onset <- phrase_tbl$mpos /4 * T
+  final$onset <- phrase_tbl$mpos / 4 * T
   final$duration <- phrase_tbl$iois*T/4
   final$pitch <- phrase_tbl$pitch
   final$chord <-phrase_tbl$chord
@@ -73,6 +74,21 @@ chorus_to_mcsv2 <- function(chorus_tbl, tempo = 120, chorus_id = 1){
   map_dfr(unique(chorus_tbl$phrase_id), function(p_id){
     phrase_to_mcsv2(chorus_tbl %>% filter(phrase_id == p_id),
                     tempo = tempo, phrase_id = p_id, chorus_id = chorus_id)
+  }) %>% set_format("mcsv2")
+}
+
+#' solo_to_mcsv2
+#'
+#' This function formats a generated solo to mcsv2-compatible data fraem
+#'
+#' @param chorus_tbl (data frame) generated phrase data.frame
+#' @param tempo (double scale) Tempo (bpm) of  the generated solo.
+#' @return A solo data frame in MCSV2 format
+#' @export
+solo_to_mcsv2 <- function(solo_tbl, tempo = 120){
+  #print(phrase_tbl)
+  map_dfr(unique(solo_tbl$chorus_id), function(c_id){
+      chorus_to_mcsv2(solo_tbl %>% filter(chorus_id == c_id), tempo = tempo, chorus_id = c_id)
   }) %>% set_format("mcsv2")
 }
 
@@ -283,7 +299,6 @@ get_iois_and_mpos <- function(pitches, start_ticks, mlu){
   list(iois = iois, mpos = mpos)
 }
 
-
 generate_phrase_over_chords <- function(lead_sheet,
                                         start_ticks,
                                         pitch_range = c(48, 84),
@@ -411,6 +426,7 @@ generate_phrase_over_chords <- function(lead_sheet,
 #' @return A solo data frame
 #' @export
 generate_chorus <- function(lead_sheet,
+                            n_chorus = 1,
                             pitch_range = c(48, 84),
                             tempo = 120,
                             lick_to_line_ratio = .5,
@@ -418,10 +434,12 @@ generate_chorus <- function(lead_sheet,
   start_mpos = 0
   ret <- list()
   current_ticks <- sample(0:7, 1)
-  max_ticks <- sum(lead_sheet$length_ticks)
 
+  max_chorus_ticks <- sum(lead_sheet$length_ticks)
+  max_ticks <- n_chorus * max_chorus_ticks
   phrase_id <- 1
-  while(current_ticks < (max_ticks - 16) && phrase_id < 10){
+  current_chorus_id <- 1
+  while(current_ticks < (max_ticks - 16)){
     mlu <- ifelse(stats::runif(1) < lick_to_line_ratio, "lick", "line")
     if(phrase_id == 1){
       mlu <- "lick"
@@ -429,16 +447,20 @@ generate_chorus <- function(lead_sheet,
     messagef("\n*** Generating phrase #%d of type %s", phrase_id, mlu)
 
     ret[[phrase_id]] <- generate_phrase_over_chords(lead_sheet,
-                                                    current_ticks,
+                                                    current_ticks %% max_chorus_ticks,
                                                     mlu = mlu,
                                                     excludes = excludes)
+    #browser()
+    ret[[phrase_id]]$mpos <- ret[[phrase_id]]$mpos + (current_chorus_id - 1)*max_chorus_ticks
     ret[[phrase_id]]$phrase_id <- phrase_id
+    ret[[phrase_id]]$chorus_id <- current_chorus_id
     phrase_break <- sample(0:15, 1)
     current_ticks <- current_ticks + sum(ret[[phrase_id]]$iois) + phrase_break
-    #printf("Current ticks %d (max %d)", current_ticks, max_ticks)
+    current_chorus_id <- floor(current_ticks/max_chorus_ticks) + 1
+    printf("Current ticks %d (max %d, chorus %d), current chorus: %d", current_ticks, max_ticks, max_chorus_ticks, current_chorus_id)
     phrase_id <- phrase_id + 1
   }
-  bind_rows(ret) %>% set_format("solo_df")
+  bind_rows(ret) %>% set_format("solo_df") %>% filter(mpos <= max_ticks)
 }
 
 #' make_many_solos

@@ -86,7 +86,7 @@ pitch_plot <- function(pitch_vec){
 }
 
 piano_roll <- function(tbl){
-  if(get_format(tbl) != "mcv2"){
+  if(get_format(tbl) != "mcsv2"){
     messagef("Warning: piano_roll plot only for mcsv2 data")
     return(NULL)
   }

@@ -106,6 +106,10 @@ chord_definitions[["min6"]][["arpeggio"]] <- c(-12, -9, -5, -4, 0, 3, 7, 9, 12, 
 chord_definitions[["min6"]][["scales"]] <- list("dorian" = dorian)
 chord_definitions[["min6"]][["scale_weights"]] <- c(1.0)
 
+chord_definitions[["minmaj7"]][["arpeggio"]] <- c(-12, -9, -5, -1, 0, 3, 7, 11, 12, 12 + 3)
+chord_definitions[["minmaj7"]][["scales"]] <- list("harmonic_minor" = harmonic_minor)
+chord_definitions[["minmaj7"]][["scale_weights"]] <- c(1.0)
+
 chord_types <- c("minmaj7", "maj7", "min7", "min6","minb6", "min", "maj", "m7b5", "o7", "o", "7", "6")
 extensions <- c("add9", "add3", "sus", "b5", "alt", "\\+", "9b", "9#", "9", "11#", "11", "13b", "13" )
 triad_types <- c("min", "maj", "min", "min", "min", "min", "maj", "o", "o", "o", "maj", "maj")

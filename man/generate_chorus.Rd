@@ -6,6 +6,7 @@
 \usage{
 generate_chorus(
   lead_sheet,
+  n_chorus = 1,
   pitch_range = c(48, 84),
   tempo = 120,
   lick_to_line_ratio = 0.5,

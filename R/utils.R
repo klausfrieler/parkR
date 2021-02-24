@@ -13,6 +13,10 @@ set_format <- function(obj, format = ""){
   return(obj)
 }
 
+get_format <- function(obj){
+  attr(obj, "format")
+}
+
 add_format <- function(obj, format = ""){
   attr(obj, "format") <- c(format, attr(obj, "format"))
   return(obj)
