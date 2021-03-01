@@ -7,8 +7,9 @@ NULL
 #' @import ggplot2
 NULL
 
-#' @importFrom stringr str_locate_all
+#' @import stringr
 NULL
+
 
 #' @importFrom stats chisq.test
 NULL
