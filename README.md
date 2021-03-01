@@ -28,8 +28,8 @@ To generate one solo chorus over an F-blues, you can type the following
 
 ```
   library('sologenerator')
-  blues_sample <- generate_chorus(sologenerator::F_blues) 
-  blues_mcsv2 <- chorus_to_mcsv2(blues_sample)  
+  blues_sample <- generate_solo(sologenerator::F_blues) 
+  blues_mcsv2 <- solo_to_mcsv2(blues_sample)  
   write_mcsv2(blues_mcsv2, "blues.csv")
 ```
 The last line writes the solo as an MCSV2 file `blues.csv`in the workind directory. This file 

@@ -9,7 +9,7 @@ write_mcsv2 <- function(data, fname){
   header <- strsplit("onset;duration;period;division;bar;beat;tatum;beat_duration;signature;pitch;phrase_id;phrase_begin", ";") %>% unlist()
   missing <- setdiff(header, names(data))
   if(length(missing)> 0){
-    stop("Invalid MCSV2 data frame")
+    stop(sprintf("Invalid MCSV2 data frame, missing: %s", paste(missing, sep = ", ", collapse = ", ")))
   }
   utils::write.table(data,
                      fname,
