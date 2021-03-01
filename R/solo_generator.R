@@ -71,7 +71,7 @@ phrase_to_mcsv2 <- function(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 
 #' @export
 chorus_to_mcsv2 <- function(chorus_tbl, tempo = 120, chorus_id = 1){
   #print(phrase_tbl)
-  map_dfr(unique(chorus_tbl$phrase_id), function(p_id){
+  purrr::map_dfr(unique(chorus_tbl$phrase_id), function(p_id){
     phrase_to_mcsv2(chorus_tbl %>% filter(phrase_id == p_id),
                     tempo = tempo, phrase_id = p_id, chorus_id = chorus_id)
   }) %>% set_format("mcsv2")
@@ -87,7 +87,7 @@ chorus_to_mcsv2 <- function(chorus_tbl, tempo = 120, chorus_id = 1){
 #' @export
 solo_to_mcsv2 <- function(solo_tbl, tempo = 120){
   #print(phrase_tbl)
-  map_dfr(unique(solo_tbl$chorus_id), function(c_id){
+  purrr::map_dfr(unique(solo_tbl$chorus_id), function(c_id){
       chorus_to_mcsv2(solo_tbl %>% filter(chorus_id == c_id), tempo = tempo, chorus_id = c_id)
   }) %>% set_format("mcsv2")
 }

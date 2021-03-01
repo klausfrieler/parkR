@@ -145,7 +145,7 @@ get_chord_tone_links <- function(solo){
 
 get_all_chord_tone_links <- function(data){
   solos <- unique(data$id)
-  solo_links <- map_dfr(solos, function(x){
+  solo_links <- purrr::map_dfr(solos, function(x){
     tmp <- get_chord_tone_links(wjd_transforms %>% filter(id == x))
     if(nrow(tmp)){
       tmp$id <- x

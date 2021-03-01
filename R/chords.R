@@ -566,7 +566,7 @@ parse_wjd_form_part <- function(form_part){
 split_wjd_changes <- function(changes, id = ""){
   print(id)
   lines <- strsplit(changes, "\n")[[1]]
-  parts <- map_dfr(lines, parse_wjd_form_part)
+  parts <- purrr::map_dfr(lines, parse_wjd_form_part)
   #browser()
   offsets <-
     parts %>%
@@ -617,7 +617,7 @@ create_sheet_from_wjd_changes <- function(changes, form_parts = NULL){
 expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL, with_key_analysis = T){
   n_ids <- length(unique(split_changes$id))
   if(n_ids > 1){
-    return(map_dfr(ids, function(i){
+    return(purrr::map_dfr(ids, function(i){
       expand_chord_changes(split_changes %>% filter(id == i))
     }))
   }
@@ -642,13 +642,13 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
   }
 
   one_chorus <-
-    map_dfr(1:nrow(split_changes),function(row_id){
+    purrr::map_dfr(1:nrow(split_changes),function(row_id){
       t <- split_changes[row_id,]
-      map_dfr(seq(t$beat_pos, t$beat_pos + t$duration-1), function(b){
+      purrr:::map_dfr(seq(t$beat_pos, t$beat_pos + t$duration-1), function(b){
         t %>% select(-beat_pos) %>%  mutate(beat_pos = b)
       })
     })
-  multi_choruses <- map_dfr(1:num_choruses, function(nc){
+  multi_choruses <- purrr::map_dfr(1:num_choruses, function(nc){
     one_chorus %>% mutate(bar_number = bar_number + (nc - 1) * chorus_length, chorus_id = nc)
   })
   if(!is.null(max_bar)) {
