@@ -422,9 +422,9 @@ shift_pc_set <- function(pc_set, shift){
 }
 find_best_matching_scale <- function(pitch_set, root = pitch_set[1]){
   if(is.list(pitch_set)){
-    print((pitch_set))
+    #print((pitch_set))
     pitch_set <- purrr::reduce(pitch_set, union)
-    print(sort(pitch_set))
+    #print(sort(pitch_set))
   }
   candidates <- purrr::map_int(scales, function(x) length(intersect(shift_pc_set(x, root), pitch_set))) %>% sort(decreasing = T)
   best = candidates[candidates == max(candidates)]
@@ -441,7 +441,7 @@ blues <- tibble(chord = c("F7","Bb7", "F7",  "Cmin7", "F7", "Bb7", "Bb7", "F7", 
                 length_beats = as.integer(c(4, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4)))
 blues <- blues %>% mutate(length_ticks = length_beats*4) %>%
                           mutate(parsed = purrr::map(chord, parse_chord)) %>%
-  unnest(cols = parsed)
+  tidyr::unnest(cols = parsed)
 blues$onset_ticks <- cumsum(blues$length_ticks)
 blues$onset_ticks <- blues$onset_ticks - blues$onset_ticks[1]
 blues$beat <- (floor(blues$onset_ticks/4) %%4 ) + 1
@@ -464,11 +464,11 @@ unroll_durations <- function(durations){
 #' @export
 create_from_irb <- function(compid, name = NULL, with_form = F){
   if(is.character(compid)){
-    sheet <- sologenerator::irb[tolower(sologenerator::irb$title) == tolower(compid),] %>%
+    sheet <- parkR::irb[tolower(parkR::irb$title) == tolower(compid),] %>%
       select(chord, duration, section, title, time, composer, date, compid, key)
   }
   else {
-    sheet <- sologenerator::irb[sologenerator::irb$compid == compid,] %>% select(chord, duration, title, time)
+    sheet <- parkR::irb[parkR::irb$compid == compid,] %>% select(chord, duration, title, time)
   }
   time <- strsplit(sheet$time[1], "/")[[1]]
   period <- as.integer(time[1])
@@ -483,7 +483,7 @@ create_from_irb <- function(compid, name = NULL, with_form = F){
     sheet %>%
     mutate(length_ticks = duration * ticks_per_beat) %>%
     mutate(parsed = purrr::map(chord, parse_chord)) %>%
-    unnest(cols = parsed)
+    tidyr::unnest(cols = parsed)
 
   sheet$onset_ticks <- unroll_durations(sheet$length_ticks)
   sheet$running_beat <- unroll_durations(sheet$duration)
@@ -516,7 +516,7 @@ create_sheet <- function(name, chords, length_beats){
                   length_beats = length_beats)
   tmp <- tmp %>% mutate(length_ticks = length_beats * 4) %>%
     mutate(parsed = purrr::map(chord, parse_chord)) %>%
-    unnest(cols = c(parsed))
+    tidyr::unnest(cols = c(parsed))
   tmp$onset_ticks <- cumsum(tmp$length_ticks)
   tmp$onset_ticks <- tmp$onset_ticks- tmp$onset_ticks[1]
   tmp$beat <- (floor(tmp$onset_ticks/4) %% 4 ) + 1
@@ -644,7 +644,7 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
   one_chorus <-
     purrr::map_dfr(1:nrow(split_changes),function(row_id){
       t <- split_changes[row_id,]
-      purrr:::map_dfr(seq(t$beat_pos, t$beat_pos + t$duration-1), function(b){
+      purrr::map_dfr(seq(t$beat_pos, t$beat_pos + t$duration-1), function(b){
         t %>% select(-beat_pos) %>%  mutate(beat_pos = b)
       })
     })

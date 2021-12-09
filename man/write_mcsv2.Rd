@@ -9,7 +9,7 @@ write_mcsv2(data, fname)
 \arguments{
 \item{data}{(data frame) MCSV2 formatted solo data.frame}
 
-\item{fname}{(character scale) path to write to.}
+\item{fname}{(character scalar) file path to write to.}
 }
 \description{
 This function write a MCSV2 formated data fraem to a file

@@ -1,21 +1,28 @@
-Package: sologenerator
+Package: parkR
 Type: Package
-Title: Generate monophonic jazz solos for chord sequences
+Title: Generates monophonic jazz solos for chord sequences
 Version: 0.1.0
-Author: NN
-Maintainer: NN <nn@nn.org>
+Authors@R: c(
+  person("Klaus", "Frieler", email = "klaus.frieler@ae.mpg.de", role = c("aut","cre"))
+  )
+Maintainer: Klaus Frieler <klaus.frieler@ae.mpg.de>
 Description: Generates jazz solos using Weimar Bebop Alphabet atoms and midlevel units based on the Weimar Jazz Database.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
+URL: https://github.com/klausfrieler/parkR
+BugReports: https://github.com/klausfrieler/parkR/issues
 LazyData: true
 Depends: 
     R (>= 3.5.0),
 Imports:
     tidyverse (>= 1.2.1),
     ggplot2,
+    ggthemes,
     dplyr,
     tibble,
     purrr,
+    purrrlyr,
+    tidyr,
     stringr,
     stats
 Suggests:

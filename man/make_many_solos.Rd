@@ -7,7 +7,7 @@
 make_many_solos(
   n,
   fname = "solos/solo",
-  lead_sheet = sologenerator::F_blues,
+  lead_sheet = parkR::F_blues,
   lick_to_line_ratio = 0.7,
   excludes = NULL
 )

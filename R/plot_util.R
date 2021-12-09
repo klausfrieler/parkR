@@ -21,7 +21,7 @@ basic_theme <- "minimal"
 
 get_default_theme <- function(x_rotate = 0, keep_legend = F){
   if (basic_theme == "tufte"){
-    t <- theme_tufte()
+    t <- ggthemes::theme_tufte()
     t <- t + theme(strip.text=element_text(size=round(default_text_size*.75), hjust=0))
     t <- t + theme(panel.border=element_blank())
   }
@@ -38,7 +38,7 @@ get_default_theme <- function(x_rotate = 0, keep_legend = F){
     t <- t + theme(strip.background = element_rect(fill = "white", color="white") )
   }
   else if(basic_theme == "few"){
-    t <- theme_few()
+    t <- ggthemes::theme_few()
     t <- t + theme(strip.text=element_text(size=round(default_text_size*.75), hjust=0))
   }
   t <- t + theme(text=element_text(size=default_text_size))
@@ -93,7 +93,7 @@ pitch_plot <- function(pitch_vec){
 #' @param by_chorus (logical scalar) Flag to add chorus facets
 #' @export
 piano_roll <- function(solo, by_chorus = T){
-  if(sologenerator:::get_format(solo) != "mcsv2"){
+  if(get_format(solo) != "mcsv2"){
     messagef("Warning: piano_roll plot only for mcsv2 data")
     return(NULL)
   }
@@ -102,7 +102,7 @@ piano_roll <- function(solo, by_chorus = T){
   q <- q + geom_line(aes(group = factor(phrase_id)))
   q <- q + get_default_theme()
   if(by_chorus){
-    q <- q + facet_wrap(~chorus_id, ncol = 1, scale = "free_x")
+    q <- q + facet_wrap(~chorus_id, ncol = 1, scales = "free_x")
   }
   q
 
@@ -121,7 +121,7 @@ cpc_plot_solo <- function(solo, by_chord = T){
   }
   if(!("cpc" %in% names(solo))){
     solo  <- solo %>%
-      mutate(cpc = (pitch - sologenerator:::parse_chord(chord)$pc) %% 12)
+      mutate(cpc = (pitch - parse_chord(chord)$pc) %% 12)
   }
   solo <- solo %>% mutate(cpc = factor(cpc, levels = 0:11, labels = 0:11))
   q<- ggplot(solo, aes(x = cpc, y = ..count..))
@@ -130,7 +130,7 @@ cpc_plot_solo <- function(solo, by_chord = T){
   q <- q + scale_x_discrete(drop = F)
   q <- q + get_default_theme()
   if(by_chord){
-    q <- q + facet_wrap(~chord, scale = "free")
+    q <- q + facet_wrap(~chord, scales = "free")
   }
   q
 }
@@ -156,7 +156,7 @@ phrase_over_form2 <- function(solo, beats, bar_unit = 4, size = 1, width=.5){
                               labels = beats[beats$beat == 1 & beats$bar %% bar_unit == 1,]$bar)
   q <- q + get_default_theme()
   q <- q + labs(x = "Bar number", y = "MIDI Pitch")
-  browser()
+  #browser()
   tmp <- beats[beats$beat == 1 & beats$bar %% bar_unit == 1, c("onset", "form", "chorus_id")]
   tmp$onset_lag1 <- dplyr::lead(tmp$onset)
   tmp$min_p <- min_p
@@ -172,6 +172,6 @@ phrase_over_form2 <- function(solo, beats, bar_unit = 4, size = 1, width=.5){
                                                 y = min_p + 3,
                                                 label = form))
   q  <- q + scale_fill_grey()
-  q  <- q + facet_wrap(~chorus_id, ncol = 1, scale = "free_x")
+  q  <- q + facet_wrap(~chorus_id, ncol = 1, scales = "free_x")
   return(q)
 }

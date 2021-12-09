@@ -3,7 +3,7 @@
 #' This function write a MCSV2 formated data fraem to a file
 #'
 #' @param data (data frame) MCSV2 formatted solo data.frame
-#' @param fname (character scale) path to write to.
+#' @param fname (character scalar) file path to write to.
 #' @export
 write_mcsv2 <- function(data, fname){
   header <- strsplit("onset;duration;period;division;bar;beat;tatum;beat_duration;signature;pitch;phrase_id;phrase_begin", ";") %>% unlist()

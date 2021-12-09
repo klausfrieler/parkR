@@ -15,7 +15,7 @@ sample_iois <- function(size = 10, start = 1){
     return(ret+3)
   }
   for(i in 2:size){
-    ret[i] <- sologenerator::succ_ioiclass %>%
+    ret[i] <- parkR::succ_ioiclass %>%
       filter(value == ret[i - 1]) %>%
       sample_n(1, replace = T) %>%
       pull(successor)
@@ -63,9 +63,8 @@ phrase_to_mcsv2 <- function(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 
 #'
 #' This function formats a generated chorus to mcsv2-compatible data fraem
 #'
-#' @param chorus_tbl (data frame) generated phrase data.frame
+#' @param chorus_tbl (data frame) generated phrases in data.frame
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.
-#' @param phrase_id (integer scalar) Id of phrase for coordination
 #' @param chorus_id (integer scalar) Id of chorus for coordination
 #' @return A solo data frame in MCSV2 format
 #' @export
@@ -81,7 +80,7 @@ chorus_to_mcsv2 <- function(chorus_tbl, tempo = 120, chorus_id = 1){
 #'
 #' This function formats a generated solo to mcsv2-compatible data fraem
 #'
-#' @param chorus_tbl (data frame) generated phrase data.frame
+#' @param solo_tbl (data frame) generated phrases in data.frame
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.
 #' @return A solo data frame in MCSV2 format
 #' @export
@@ -312,10 +311,10 @@ generate_phrase_over_chords <- function(lead_sheet,
                                         min_len = 2,
                                         max_len = 10){
   if(mlu == "line"){
-    len <- sologenerator::length_dist %>% filter(n > 5)  %>% sample_n(1) %>% pull(n)
+    len <- parkR::phrase_length_dist %>% filter(n > 5)  %>% sample_n(1) %>% pull(n)
   }
   else{
-    len <- sologenerator::length_dist %>% filter(n < 10)  %>% sample_n(1) %>% pull(n)
+    len <- parkR::phrase_length_dist %>% filter(n < 10)  %>% sample_n(1) %>% pull(n)
   }
   len <- min(max_len, max(min_len, len))
   ret <- list()
@@ -324,7 +323,7 @@ generate_phrase_over_chords <- function(lead_sheet,
 
   #first find and generate start atom
   while(!okay){
-    start_atom <- sologenerator::phrase_begin_dist %>% sample_n(1)
+    start_atom <- parkR::phrase_begin_dist %>% sample_n(1)
     #print(sprintf("Start: %s (%s)",  start$value, start$type))
     if(mlu == "line" && start_atom$type == "R"){
       next
@@ -370,7 +369,7 @@ generate_phrase_over_chords <- function(lead_sheet,
       if(j > 100){
         stop("Infinite loop in generate")
       }
-      candidate <- sologenerator::successor_dist %>%
+      candidate <- parkR::successor_dist %>%
         filter(type == last$type,
                direction == direction) %>%
         sample_n(1, replace=T)
@@ -481,7 +480,7 @@ generate_solo <- function(lead_sheet,
 #' @export
 make_many_solos <- function(n,
                             fname="solos/solo",
-                            lead_sheet = sologenerator::F_blues,
+                            lead_sheet = parkR::F_blues,
                             lick_to_line_ratio = .7,
                             excludes = NULL
                             ){

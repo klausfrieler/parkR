@@ -45,11 +45,11 @@ vec_to_value <- function(int_vec){
   sprintf("[%s]", paste(int_vec, collapse=","))
 }
 
-add_overlaps <- function(data, type=c("all", "pre", "post")) {
+add_overlaps <- function(data, type = c("all", "pre", "post")) {
   data <- data %>%
-    mutate(pre_over = data.table::shift(data$end, type="lag")- data$start + 1)
+    mutate(pre_over = dplyr::lag(data$end)- data$start + 1)
   data <- data %>%
-           mutate(post_over = data.table::shift(data$pre_over, type="lead"))
+           mutate(post_over = dplyr::lead(data$pre_over))
   if(type[1] == "all"){
     return(data)
   }
@@ -156,7 +156,7 @@ make_rle_df <- function(data, var){
 values_from_positions <- function(int_vector, data){
   values <- purrrlyr::by_row(data,
                          function(x) vec_to_value(int_vector[x$start:x$end])) %>%
-    unnest(cols = c(.out)) %>%
+    tidyr::unnest(cols = c(.out)) %>%
     as.data.frame()
 
     values[, ".out"]
@@ -165,7 +165,7 @@ values_from_positions <- function(int_vector, data){
 directions_from_positions <- function(int_vector, data){
   values <- purrrlyr::by_row(data,
                           function(x) sign(sum(int_vector[x$start:x$end]))) %>%
-    unnest(cols = c(.out)) %>%
+    tidyr::unnest(cols = c(.out)) %>%
     as.data.frame()
 
   values[, ".out"]
@@ -279,7 +279,7 @@ find_scales <- function(int_vector){
   ###### second approach#######
   #types <- purrrlyr::by_row(scales,
   #                          function(x) classify_scale(int_vector[x$start:x$end])) %>%
-  #  unnest(cols = c(.out)) %>%
+  #  tidyr::unnest(cols = c(.out)) %>%
   #  as.data.frame()
   #scales$type <- types[, ".out"]
 
@@ -315,9 +315,6 @@ find_arpeggios <- function(int_vector){
   tmp
 }
 
-by_row_result_to_vec <- function(by_row_result_tbl){
-  by_row_result_tbl %>% select(cols = c(.out)) %>% unlist()
-}
 
 find_chords <- function(int_vector){
   arp_int_vector <- sign(int_vector)*get_arp_int_from_int(int_vector)
@@ -344,11 +341,11 @@ find_chords <- function(int_vector){
 }
 
 find_trills <- function(int_vector){
-  sum_vector <- int_vector + data.table::shift(int_vector, 1, type="lead")
+  sum_vector <- int_vector + dplyr::lead(int_vector, 1)
   zero_crossings <- intersect(which(sum_vector == 0),
-                              which(abs(int_vector) %in% c(1,2)))
+                              which(abs(int_vector) %in% c(1, 2)))
   #print(zero_crossings)
-  trills<-get_rle_df(sum_vector) %>% filter(value == 0, length>0, start %in% zero_crossings)
+  trills<-get_rle_df(sum_vector) %>% filter(value == 0, length > 0, start %in% zero_crossings)
   if(nrow(trills) == 0){
     return(NULL)
   }
@@ -373,22 +370,22 @@ find_trills <- function(int_vector){
              stringsAsFactors=F)
 }
 
-find_bigram <- function(int_vector, bigram, value="F"){
-  bigrams <- paste(int_vector, data.table::shift(int_vector, 1, type="lead"), sep=" ")
+find_bigram <- function(int_vector, bigram, value = "F"){
+  bigrams <- paste(int_vector, dplyr::lead(int_vector, 1), sep = " ")
   bigram <- paste(bigram, collapse=" ")
   pos <- which(bigrams == bigram)
   if(length(pos) == 0){
     return(NULL)
   }
-  values <- values_from_positions(int_vector, data.frame(start=pos, end=pos+1))
-  directions <- directions_from_positions(int_vector, data.frame(start=pos, end=pos+1))
+  values <- values_from_positions(int_vector, data.frame(start = pos, end = pos+1))
+  directions <- directions_from_positions(int_vector, data.frame(start = pos, end = pos + 1))
   data.frame(length = 2,
              type = "F",
              value = values,
              direction = directions,
              start = pos,
              end = pos + 1,
-             stringsAsFactors=F)
+             stringsAsFactors = F)
 }
 
 find_approaches <- function(int_vector){
@@ -546,7 +543,7 @@ remove_rows <- function(data, rows){
   data[left_over,]
 }
 
-remove_redundants <- function(data, debug=F){
+remove_redundants <- function(data, debug = F){
   to_remove <- which(data$length == 2 &
                        data$pre_over == 1 &
                        data$post_over == 1 & data$type %in% c("F", "T"))
@@ -883,8 +880,9 @@ get_class_code_raw <- function(data, type = c("full", "reduced", "short", "exten
 }
 
 compare_freq <- function(data1, data2, type="F"){
-  tt <- bind_rows(tibble(source = 1, value=data1[data1$type == type,]$value),
-              tibble(source = 2, value=data2[data2$type == type,]$value))
+  tt <- bind_rows(
+    tibble(source = 1, value=data1[data1$type == type,]$value),
+    tibble(source = 2, value=data2[data2$type == type,]$value))
   #print(tt)
   tt$value <- factor(tt$value)
   tt1 <- table(tt[tt$source == 1,]$value)
@@ -902,7 +900,7 @@ hash_wba_dataframe <- function(data){
     too_long <- TRUE
     print(sprintf("Too long by %d", tl))
   }
-  hashes <- by_row(data, function(x){
+  hashes <- purrrlyr::by_row(data, function(x){
                           hash_wba(x$type, x$direction, x$length)}) %>%
     select(cols = c(.out)) %>%
     unlist() %>%
@@ -932,8 +930,8 @@ find_wba <- function(x, debug = F){
     resolve_overlaps(debug = debug)
 }
 
-recalc_pattern_classes <- function(){
-  patterns <- lapply(unique(master$value), pattern_to_vec)
+recalc_pattern_classes <- function(data){
+  patterns <- lapply(unique(data$value), pattern_to_vec)
   patterns_classes <- purrr::map(patterns,
                                  function(x) data.frame(pattern = vec_to_value(x),
                                                         find_wba(x)))

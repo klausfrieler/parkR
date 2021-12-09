@@ -1,7 +1,7 @@
-# WBA-MLA Solo Generator
+# parkR: WBA-MLA Solo Generator
 
 
-The WBA-MLA Solo Generator is a small tool that is able to generate monophonic jazz solos. It also contains two data sets of jazz chord changes, the iRealPro collection and changes taken from the Weimar Jazz Database
+The parkR package for R contains the WBA-MLA Solo Generator which is a small tool that is able to generate monophonic jazz solos. It also contains two data sets of jazz chord changes, the iRealPro collection and a set of changes taken from the Weimar Jazz Database. Paper preprint: https://osf.io/wn27k/
 
 ## Citation
 
@@ -16,9 +16,9 @@ The WBA-MLA Solo Generator is a small tool that is able to generate monophonic j
 
 `install.packages('devtools')`
 
-4. Install the WBA-MLA Solo Generator:
+4. Install the parkR package from Github:
 
-`devtools::install_github('nn/sologenerator')`
+`devtools::install_github('klausfrieler/parkR')`
 
 ## Usage
 
@@ -27,8 +27,8 @@ The WBA-MLA Solo Generator is a small tool that is able to generate monophonic j
 To generate one solo chorus over an F-blues, you can type the following
 
 ```
-  library('sologenerator')
-  blues_sample <- generate_solo(sologenerator::F_blues) 
+  library('parkR')
+  blues_sample <- generate_solo(parkR::F_blues) 
   blues_mcsv2 <- solo_to_mcsv2(blues_sample)  
   write_mcsv2(blues_mcsv2, "blues.csv")
 ```
@@ -40,7 +40,7 @@ More lead sheets can be found in the irb and wjd_chord_db data sets, incorporate
 
 ```
   library(tidyverse)
-  library(sologenerator)
+  library(parkR)
   create_from_irb("All the things you are") %>% 
     generate_solo(n_chorus = 2) %>% 
     solo_to_mcsv2() %>%  

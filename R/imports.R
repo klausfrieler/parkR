@@ -7,7 +7,19 @@ NULL
 #' @import ggplot2
 NULL
 
+#' @import ggthemes
+NULL
+
 #' @import stringr
+NULL
+
+#' @import purrr
+NULL
+
+#' @import purrrlyr
+NULL
+
+#' @import tidyr
 NULL
 
 

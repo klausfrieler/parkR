@@ -1,4 +1,4 @@
-# sologenerator 0.1.0
+# parkR 0.1.0
 
 Initial version.
 

@@ -6,6 +6,4 @@
 \title{WBA_df}
 \description{
 Database of WBA atoms
-
-First order Markov transitions of WBA atoms
 }

@@ -19,11 +19,18 @@ NULL
 #' @docType data
 NULL
 
+#' wba_mla
+#'
+#' Database of WBA atoms and midlevel units (MLUs)
+#' @name wba_mla
+#' @docType data
+NULL
+
 
 #' successor_dist
 #'
 #' First order Markov transitions of WBA atoms
-#' @name WBA_df
+#' @name successor_dist
 #' @docType data
 NULL
 
@@ -43,8 +50,15 @@ NULL
 
 #' length_dist
 #'
-#' Disbtribution of phrase lengths and relative phrase positions
+#' Disbtribution of number of phrases over WJD solos
 #' @name length_dist
+#' @docType data
+NULL
+
+#' phrase_length_dist
+#'
+#' Disbtribution of phrase lengths and relative phrase positions
+#' @name phrase_length_dist
 #' @docType data
 NULL
 

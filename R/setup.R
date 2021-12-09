@@ -38,7 +38,7 @@ setup_distibrutions <- function(recalc = F){
 
   if(recalc){
     successor_dist <- WBA_df %>%
-      nest(-id, -phrase_id)
+      tidyr::nest(-id, -phrase_id)
     ret <- list()
     for(i in 1:nrow(successor_dist)){
       ret[[i]] <- get_successor_dist(successor_dist[i,]$data[[1]])
@@ -61,18 +61,18 @@ setup_distibrutions <- function(recalc = F){
   }
 
   if(recalc){
-    phrase_length_dist <- wjd_transforms %>%
+    length_dist <- wjd_transforms %>%
       group_by(id) %>%
       summarise(num_phrases = max(phrase_id_raw))
-    save(phrase_length_dist, "data/phrase_length_dist")
+    save(length_dist, "data/length_dist.rda")
   }
   else{
-    load("data/phrase_length_dist.rda")
+    load("data/length_dist.rda")
 
   }
 
   if(recalc){
-    length_dist <- WBA_df %>%
+    phrase_length_dist <- WBA_df %>%
       group_by(id) %>%
       mutate(rel_phrase_pos =(phrase_id-1)/(max(phrase_id)-1)) %>%
       group_by(id, phrase_id) %>%
@@ -80,10 +80,10 @@ setup_distibrutions <- function(recalc = F){
                  rpp = max(rel_phrase_pos)) %>%
       ungroup() %>%
       select(n, rpp)
-    save(length_dist, "data/length_dist")
+    save(phrase_length_dist, "data/phrase_length_dist.rda")
   }
   else{
-    load("data/length_dist.rda")
+    load("data/phrase_length_dist.rda")
 
   }
 

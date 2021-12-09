@@ -7,9 +7,9 @@
 solo_to_mcsv2(solo_tbl, tempo = 120)
 }
 \arguments{
-\item{tempo}{(double scale) Tempo (bpm) of  the generated solo.}
+\item{solo_tbl}{(data frame) generated phrases in data.frame}
 
-\item{chorus_tbl}{(data frame) generated phrase data.frame}
+\item{tempo}{(double scale) Tempo (bpm) of  the generated solo.}
 }
 \value{
 A solo data frame in MCSV2 format

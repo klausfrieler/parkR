@@ -7,13 +7,11 @@
 chorus_to_mcsv2(chorus_tbl, tempo = 120, chorus_id = 1)
 }
 \arguments{
-\item{chorus_tbl}{(data frame) generated phrase data.frame}
+\item{chorus_tbl}{(data frame) generated phrases in data.frame}
 
 \item{tempo}{(double scale) Tempo (bpm) of  the generated solo.}
 
 \item{chorus_id}{(integer scalar) Id of chorus for coordination}
-
-\item{phrase_id}{(integer scalar) Id of phrase for coordination}
 }
 \value{
 A solo data frame in MCSV2 format
