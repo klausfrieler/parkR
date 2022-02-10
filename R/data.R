@@ -5,6 +5,13 @@
 #' @docType data
 NULL
 
+#' irb chords with derived information
+#'
+#' The IRealPro lead sheets + derived information
+#' @name irb_extended
+#' @docType data
+NULL
+
 #' WJD chords
 #'
 #' Chord changes /lead sheets extracted from the Weimar Jazz Database
