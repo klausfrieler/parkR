@@ -1,7 +1,7 @@
 Package: parkR
 Type: Package
 Title: Generates monophonic jazz solos for chord sequences
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
   person("Klaus", "Frieler", email = "klaus.frieler@ae.mpg.de", role = c("aut","cre"))
   )

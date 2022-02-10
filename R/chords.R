@@ -279,7 +279,7 @@ spread_pitches <- function(pc_set, root, min_pitch = 48, max_pitch = 84){
 
 find_best_pitchset_match <- function(int_vector, start_pitch, pitch_vector, max_transposition = 2){
   if(is.character(int_vector)){
-    int_vector <- pattern_to_vec(int_vector)
+    int_vector <- value_to_vec(int_vector)
   }
   max_w <- 0
   ret <- NULL
@@ -305,7 +305,7 @@ find_best_match_to_chord <- function(int_vector, start_pitch, chord, max_transpo
   #print(int_vector)
   #browser()
   if(is.character(int_vector)){
-    int_vector <- pattern_to_vec(int_vector)
+    int_vector <- value_to_vec(int_vector)
   }
   tmp <- get_scale_pitches(chord, sample = F, return_weights = T)
   scales <- tmp$scales
@@ -379,7 +379,8 @@ get_scale_pitches <- function(chord, min_pitch = 48, max_pitch = 84, sample = T,
   }
   scales
 }
-get_arpeggio_pitches <- function(chord, min_pitch=48, max_pitch=84){
+
+get_arpeggio_pitches <- function(chord, min_pitch = 48, max_pitch = 84){
   if(length(chord) > 1){
     return(lapply(chord, get_arpeggio_pitches, min_pitch, max_pitch))
   }
@@ -420,6 +421,7 @@ get_common_scale <- function(chord_list, n = NULL, remove_duplicates = T ){
 shift_pc_set <- function(pc_set, shift){
   (pc_set + shift) %% 12
 }
+
 find_best_matching_scale <- function(pitch_set, root = pitch_set[1]){
   if(is.list(pitch_set)){
     #print((pitch_set))

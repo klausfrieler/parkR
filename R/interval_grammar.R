@@ -3,35 +3,31 @@ library(tidyverse)
 messagef <- function(...) message(sprintf(...))
 printf <- function(...) print(sprintf(...))
 
-pattern_to_vec <- function(pat_str){
-  #pat_vec <- gsub("\\[", "c(", as.character(pat_vec))
-  #pat_vec <- gsub("\\]", ")", pat_vec)
-  #eval(parse(text=pat_vec))
-  pat_vec <- gsub("\\[", "", as.character(pat_str))
-  pat_vec <- gsub("\\]", "", pat_vec)
-  pat_vec <- gsub(" ", "", pat_vec)
-  as.integer(unlist(strsplit(pat_vec, ",")))
+value_to_vec <- function(value_str){
+  vec <- gsub("\\[", "", as.character(value_str))
+  vec <- gsub("\\]", "", vec)
+  vec <- gsub(" ", "", vec)
+  as.integer(unlist(strsplit(vec, ",")))
 }
 
+# column_to_vector <- function(tbf, col_name) tbf[[col_name]]
+# column_to_table   <- function(tbf, col_name) table(tbf[[col_name]])
+# column_to_prop_table <- function(tbf, col_name) round(prop.table(table(tbf[[col_name]])) * 100, 1)
 
-column_to_vector <- function(tbf, col_name) tbf[[col_name]]
-column_to_table   <- function(tbf, col_name) table(tbf[[col_name]])
-column_to_prop_table <- function(tbf, col_name) round(prop.table(table(tbf[[col_name]])) * 100, 1)
+#words <- c("Diatonic Scales"="D", "Arpeggios"="A", "Figurations"="F", "L"="Link")
+# long_names <- c("D" = "Diatonic (D)",
+#                 "C" = "Chromatic (C)",
+#                 "A" = "Arpeggio (A)",
+#                 "J" = "Jump Arpeggio (J)",
+#                 "F" = "Approach (F)",
+#                 "L" = "Link (L)",
+#                 "X" = "X Atom (X)",
+#                 "T" = "Trill (T)",
+#                 "R" = "Repetition (R)")
 
-words <- c("Diatonic Scales"="D", "Arpeggios"="A", "Figurations"="F", "L"="Link")
-long_names <- c("D" = "Diatonic (D)",
-                "C" = "Chromatic (C)",
-                "A" = "Arpeggio (A)",
-                "J" = "Jump Arpeggio (J)",
-                "F" = "Approach (F)",
-                "L" = "Link (L)",
-                "X" = "X Atom (X)",
-                "T" = "Trill (T)",
-                "R" = "Repetition (R)")
-
-directions <- c("Up" = "+",
-                "Down"="-",
-                "Oblique" = "")
+# directions <- c("Up" = "+",
+#                 "Down"="-",
+#                 "Oblique" = "")
 
 int_span <- function(start, end){
   mapply(function(x, y){seq(x, y, 1)}, start, end) %>%
@@ -53,7 +49,7 @@ add_overlaps <- function(data, type = c("all", "pre", "post")) {
   if(type[1] == "all"){
     return(data)
   }
-  data <- as.data.frame(data)
+  #data <- as.data.frame(data)
   if(type[2] == "pre"){
     return(data$pre_over)
   }
@@ -64,14 +60,14 @@ add_overlaps <- function(data, type = c("all", "pre", "post")) {
 }
 
 get_gaps <- function(start, end, min_val = NULL, max_val = NULL){
-  base <- int_span(start,end)
+  base <- int_span(start, end)
   #print(base)
   d <- diff(base)
   #print(d)
   gap_pos <- which(d > 1)
   #print(gap_pos)
-  starts <- base[gap_pos]+1
-  ends   <- starts + d[gap_pos]-2
+  starts <- base[gap_pos] + 1
+  ends   <- starts + d[gap_pos] - 2
   no_gaps <- length(starts) == 0
   left_border <- min(base)
   right_border <- max(base)
@@ -79,7 +75,7 @@ get_gaps <- function(start, end, min_val = NULL, max_val = NULL){
   if(!is.null(min_val)){
     if(min_val < left_border){
       starts <- c(min_val, starts)
-      ends   <- c(left_border-1, ends)
+      ends   <- c(left_border - 1, ends)
     }
   }
   if(!is.null(max_val)){
@@ -88,7 +84,7 @@ get_gaps <- function(start, end, min_val = NULL, max_val = NULL){
       ends <- c(ends, max_val)
     }
   }
-  data.frame(length=ends-starts+1, start=starts, end=ends)
+  tibble(length = ends - starts + 1, start = starts, end = ends)
 }
 
 get_arp_int_from_int <- function(x){
@@ -141,41 +137,30 @@ get_rle_df <- function(int_vector){
     start <- cumsum(c(1, RLE$lengths[1:(l-1)]))
     end   <- cumsum(c(1, RLE$lengths[1:(l-1)])) + RLE$lengths-1
   }
-  data.frame(length = RLE$lengths,
-             value = RLE$value,
-             direction = sign(RLE$value),
-             start = start,
-             end   = end,
-             stringsAsFactors=F)
+  tibble(length = RLE$lengths,
+         value = RLE$value,
+         direction = sign(RLE$value),
+         start = start,
+         end   = end)
 }
 
 make_rle_df <- function(data, var){
-  get_rle_df(as.data.frame(data)[, var])
+  get_rle_df(data %>% pull(!!sym(var)))
 }
 
 values_from_positions <- function(int_vector, data){
-  values <- purrrlyr::by_row(data,
-                         function(x) vec_to_value(int_vector[x$start:x$end])) %>%
-    tidyr::unnest(cols = c(.out)) %>%
-    as.data.frame()
-
-    values[, ".out"]
+  map2_chr(data$start, data$end, ~{vec_to_value(int_vector[.x:.y])})
 }
 
 directions_from_positions <- function(int_vector, data){
-  values <- purrrlyr::by_row(data,
-                          function(x) sign(sum(int_vector[x$start:x$end]))) %>%
-    tidyr::unnest(cols = c(.out)) %>%
-    as.data.frame()
-
-  values[, ".out"]
+  map2_dbl(data$start, data$end, ~{sign(sum(int_vector[.x:.y]))})
 }
 
 classify_scale <- function(x){
   if(is.character(x)){
-    x <- pattern_to_vec(x)
+    x <- value_to_vec(x)
   }
-  tt<-table(abs(x))
+  tt <- table(abs(x))
   stopifnot(length(tt) <= 2)
   if(length(tt) == 1){
     if( "1" %in% names(tt)){
@@ -184,7 +169,7 @@ classify_scale <- function(x){
     return("D")
   }
 
-  if(tt["1"]>(tt["2"]+1)){
+  if(tt["1"] > (tt["2"] + 1)){
     return("C")
   }
   return("D")
@@ -203,7 +188,7 @@ find_chromatic_scales <- function(int_vector){
 
 find_diatonic_scales <- function(int_vector){
   scales <- get_rle_df(get_fuzzyint_from_int(int_vector))
-  scales <- scales %>% filter(abs(value) == 1, length>1)
+  scales <- scales %>% filter(abs(value) == 1, length > 1)
   if(nrow(scales) == 0){
     return(NULL)
   }
@@ -233,13 +218,12 @@ split_scales <- function(int_vector){
     #cat("Testing", vec, "\n")
     #print(row)
     if(row$length == 1){
-      ret[[i]] <- data.frame(length=1,
-                             value=vec_to_value(vec),
-                             direction = sign(vec),
-                             start=row$start,
-                             end=row$end,
-                             type="X",
-                             stringsAsFactors=F)
+      ret[[i]] <- tibble(length = 1,
+                         value = vec_to_value(vec),
+                         direction = sign(vec),
+                         start = row$start,
+                         end = row$end,
+                         type = "X")
     }
     else{
       tmp <- find_diatonic_scales(vec)
@@ -261,7 +245,7 @@ find_scales <- function(int_vector){
   for(i in 1:nrow(scales)){
     row <- scales[i,]
     #print(row)
-    splits <- split_scales(pattern_to_vec(row$value))
+    splits <- split_scales(value_to_vec(row$value))
     if(!is.null(splits)){
       splits <- bind_rows(splits)
       splits$start <- splits$start + row$start -1
@@ -319,7 +303,7 @@ find_arpeggios <- function(int_vector){
 find_chords <- function(int_vector){
   arp_int_vector <- sign(int_vector)*get_arp_int_from_int(int_vector)
   tmp <- get_rle_df(arp_int_vector)
-  tmp <- tmp %>% filter(value, length>1)
+  tmp <- tmp %>% filter(value > 0, length>1)
   if(nrow(tmp) == 0){
     return(NULL)
   }
@@ -329,7 +313,7 @@ find_chords <- function(int_vector){
     unlist(
       lapply(
         tmp$value,
-        function(x) length(setdiff(unique(abs(pattern_to_vec(x))), c(3,4)))
+        function(x) length(setdiff(unique(abs(value_to_vec(x))), c(3,4)))
         )
       )
   )
@@ -343,7 +327,7 @@ find_chords <- function(int_vector){
 find_trills <- function(int_vector){
   sum_vector <- int_vector + dplyr::lead(int_vector, 1)
   zero_crossings <- intersect(which(sum_vector == 0),
-                              which(abs(int_vector) %in% c(1, 2)))
+                              which(abs(int_vector) %in% c(1, 2, 3)))
   #print(zero_crossings)
   trills<-get_rle_df(sum_vector) %>% filter(value == 0, length > 0, start %in% zero_crossings)
   if(nrow(trills) == 0){
@@ -353,21 +337,20 @@ find_trills <- function(int_vector){
   #  return(NULL)
   #}
   trills$length <- trills$length + 1
-  trills$end <- trills$end+1
+  trills$end <- trills$end + 1
   trills$type <- "T"
   trills$value <- values_from_positions(int_vector, trills)
   trills$direction <- 0
   return(trills)
   values <- values_from_positions(int_vector,
-                                 data.frame(start=zero_crossings,
-                                            end =zero_crossings+1))
-  data.frame(length = 2,
+                                 tibble(start = zero_crossings,
+                                        end = zero_crossings + 1))
+  tibble(length = 2,
              type = "T",
              value = values,
              direction = sign(int_vector[zero_crossings]),
              start = zero_crossings,
-             end   = zero_crossings + 1,
-             stringsAsFactors=F)
+             end   = zero_crossings + 1)
 }
 
 find_bigram <- function(int_vector, bigram, value = "F"){
@@ -377,15 +360,14 @@ find_bigram <- function(int_vector, bigram, value = "F"){
   if(length(pos) == 0){
     return(NULL)
   }
-  values <- values_from_positions(int_vector, data.frame(start = pos, end = pos+1))
-  directions <- directions_from_positions(int_vector, data.frame(start = pos, end = pos + 1))
-  data.frame(length = 2,
-             type = "F",
-             value = values,
-             direction = directions,
-             start = pos,
-             end = pos + 1,
-             stringsAsFactors = F)
+  values <- values_from_positions(int_vector, tibble(start = pos, end = pos + 1))
+  directions <- directions_from_positions(int_vector, tibble(start = pos, end = pos + 1))
+  tibble(length = 2,
+         type = "F",
+         value = values,
+         direction = directions,
+         start = pos,
+         end = pos + 1)
 }
 
 find_approaches <- function(int_vector){
@@ -406,6 +388,9 @@ find_approaches <- function(int_vector){
   apps[["zg_d"]] <- find_bigram(int_vector, c( 2,-3))
   apps[["zh_u"]] <- find_bigram(int_vector, c(-1, 2))
   apps[["zh_d"]] <- find_bigram(int_vector, c( 1,-2))
+  if(length(apps) == 0){
+    return(NULL)
+  }
   bind_rows(apps) %>% arrange(start)
 }
 
@@ -414,34 +399,34 @@ get_overlaps <- function(class_df, int_vector){
   ret <- NULL
   for(i in 1:(n-1)){
     s1 <- seq(class_df[i,]$start, class_df[i,]$end)
-    s2 <- seq(class_df[i+1,]$start, class_df[i+1,]$end)
+    s2 <- seq(class_df[i+1,]$start, class_df[i + 1,]$end)
     is <- intersect(s1, s2)
     value <- vec_to_value(int_vector[is])
     value1 <- vec_to_value(int_vector[s1])
     value2 <- vec_to_value(int_vector[s2])
-    overlap <- class_df[i,]$end - class_df[i+1,]$start + 1
+    overlap <- class_df[i,]$end - class_df[i + 1,]$start + 1
     if(overlap){
-      ret<-rbind(ret, data.frame( end = class_df[i,]$end,
-                                start = class_df[i+1,]$start,
-                                overlap_value = value,
-                                value1 = value1,
-                                value2 = value2,
-                                overlap=overlap,
-                                stringsAsFactors=F))
+      ret<-rbind(ret, tibble(end = class_df[i,]$end,
+                             start = class_df[i + 1,]$start,
+                             overlap_value = value,
+                             value1 = value1,
+                             value2 = value2,
+                             overlap = overlap))
     }
   }
   return(ret)
 }
+
 fill_up_classes <- function(int_vector, class_df){
   l <- length(int_vector)
   if(is.null(class_df)  || nrow(class_df) == 0){
-    prefix <- data.frame(length = l,
-                         type = "X",
-                         direction = sign(sum(int_vector[1:l])),
-                         value = vec_to_value(int_vector[1:l]),
-                         start = 1,
-                         end = l,
-                         stringsAsFactors = F)
+    prefix <- tibble(length = l,
+                     type = "X",
+                     direction = sign(sum(int_vector[1:l])),
+                     value = vec_to_value(int_vector[1:l]),
+                     start = 1,
+                     end = l,
+                     stringsAsFactors = F)
     return(prefix)
   }
   events <- int_span(class_df$start, class_df$end)
@@ -476,7 +461,7 @@ find_repetitions <- function(int_vector){
 }
 
 normalize <- function(data){
-  if(!is.null(data) && length(data)>0){
+  if(!is.null(data) && length(data) > 0){
     data <- data[, c("length", "type", "value", "direction", "start", "end")]
   }
   data
@@ -499,42 +484,19 @@ find_classes <- function(int_vector, debug = F){
   #print(length(approaches))
   #print(lapply(list(repetitions, arps, scales, trills, approaches), normalize))
 
-  tmp<- bind_rows(lapply(list(repetitions,
+  tmp <- bind_rows(lapply(list(repetitions,
                               arps,
                               scales,
                               trills,
-                              approaches), normalize)) %>% arrange(start)
+                              approaches), normalize))
+  if(nrow(tmp) > 0){
+    tmp <- tmp %>% arrange(start)
+  }
   gaps <- fill_up_classes(int_vector, tmp)
   #print(gaps)
   tmp <- rbind(tmp, gaps) %>% arrange(start)
   tmp <- add_overlaps(tmp, type = "all")
   return(tmp)
-}
-
-find_wba_by_phrase <- function(data, id = NULL){
-  if(!is.null(id)){
-    data <- data[data$id == id,]
-    message(sprintf("Checking %s with %d phrases", id, length(unique(data$phrase_id_raw))))
-  }
-  phrases <- unique(data$phrase_id)
-  ret <- list()
-  for(i in phrases){
-    #print(sprintf("Checking phrase %d", i))
-    int_vector <- data[data$phrase_id == i,]$int_raw
-    #ignore last interval because it belongs to next phrase
-    tmp <- find_wba(int_vector[1:(length(int_vector)-1)])
-    tmp$phrase_id <- i
-    ret[[i]] <- tmp
-  }
-  ret <- bind_rows(ret)
-  if(!is.null(id)){
-    ret$id <- id
-    ret$id <- as.character(ret$id)
-  }
-  if(nrow(ret[ret$type == "X" & ret$length == 1,])){
-    ret[ret$type == "X" & ret$length == 1,]$type <- "L"
-  }
-  ret
 }
 
 remove_rows <- function(data, rows){
@@ -550,7 +512,7 @@ remove_redundants <- function(data, debug = F){
   i <- 0
   #print(data)
   limits <- 1 + length(to_remove)
-  while(length(to_remove) >0){
+  while(length(to_remove) > 0){
     i <- i + 1
     if(i >limits) stop("Found infinite loop while removing redundants")
     #print(sprintf("Removing row %d", to_remove[1]))
@@ -578,7 +540,7 @@ cut_row <- function(data, row_index, type=c("left", "right")){
   if(row$length == 1){
     return(remove_rows(data, row_index))
   }
-  vec <- pattern_to_vec(row$value)
+  vec <- value_to_vec(row$value)
   dir_flag <- 1
   if(type[1] == "left"){
     new_vec <- vec[2:length(vec)]
@@ -604,37 +566,31 @@ cut_row <- function(data, row_index, type=c("left", "right")){
 }
 
 get_two_rows <- function(data, row_index){
-  data[row_index:(row_index+1),]
+  data[row_index:(row_index + 1),]
 }
 
-show_overlaps <- function(data, thresh=0, type=NULL, complete_idx =F){
+show_overlaps <- function(data, thresh = 0, type = NULL, complete_idx = F){
   data %>%
-    mutate(rows=1:nrow(data)) %>%
+    mutate(rows = 1:nrow(data)) %>%
     filter(post_over > thresh) -> overs
   if (!is.null(type)){
     overs <- overs %>% filter(type ==type)
   }
   overs <- overs %>%
-    column_to_vector("rows")
+    pull(rows)
 
-  #map(overs, function(x)
-  #  paste(sprintf("%s%d", get_two_rows(data, x)$type, get_two_rows(data, x)$length), collapse="-"))
   if(complete_idx){
-    return(sort(unique(c(overs, overs+1))))
+    return(sort(unique(c(overs, overs + 1))))
   }
   return(sort(overs))
 }
 
-insert_rows <- function(data, row_index, rows){
-
-}
-
 fuse_row_pair <- function(data, row_index){
-  if(row_index <1 || row_index > nrow(data)){
+  if(row_index < 1 || row_index > nrow(data)){
     stop("Invalid row index")
   }
   row1 <- data[row_index,]
-  row2 <- data[row_index+1,]
+  row2 <- data[row_index + 1,]
   type1 <- row1$type
   type2 <- row2$type
   if(type1 != type2) {
@@ -642,18 +598,18 @@ fuse_row_pair <- function(data, row_index){
   }
   dir1 <- row1$direction
   dir2 <- row2$direction
-  if(type1 != "X" && dir1*dir2 <0) {
+  if(type1 != "X" && dir1 * dir2 < 0) {
     return(data)
   }
   new_row <- row1
   #print(sprintf("Fusing %s and %s", row1$value, row2$value))
-  new_value <- c(pattern_to_vec(row1$value), pattern_to_vec(row2$value))
+  new_value <- c(value_to_vec(row1$value), value_to_vec(row2$value))
   #if(row_index == 14)print(new_value)
   #print((find_classes(new_value)))
   cc <- add_overlaps(normalize(find_classes(new_value)))
   #data[row_index,]$value <- new_value
-  cc$start <- cc$start + row1$start -1
-  cc$end <-  cc$end + row1$start -1
+  cc$start <- cc$start + row1$start - 1
+  cc$end <-  cc$end + row1$start - 1
   data <- remove_rows(data, row_index)
   #print(data)
   data <- remove_rows(data, row_index)
@@ -749,9 +705,9 @@ resolve_overlaps <- function(data, debug = F){
   double_X <- doubles[which(data$type[doubles] == "X")]
   i <- 0
   limit <- ifelse(debug, 1, 10) + length(double_X)
-  while(length(double_X) >0){
+  while(length(double_X) > 0){
     i <- i + 1
-    if(i>limit) stop("Infinite loop in fusing rows")
+    if(i > limit) stop("Infinite loop in fusing rows")
       if(debug)cat("Fusing row", double_X[1], "\n")
       data <- fuse_row_pair(data, double_X[1])
       #if(debug) print(data)
@@ -781,10 +737,10 @@ remove_overlaps <- function(data){
 get_class_code <- function(data, type = c("full", "reduced", "short", "extended"), as_vector = F, with_overlap = T){
   if(is.character(data)){
     if(with_overlap){
-      data <- find_classes(pattern_to_vec(data))
+      data <- find_classes(value_to_vec(data))
     }
     else{
-      data <- find_wba(pattern_to_vec(data))
+      data <- find_wba(value_to_vec(data))
     }
   }
   else if(is.numeric(data)){
@@ -841,7 +797,7 @@ get_class_code <- function(data, type = c("full", "reduced", "short", "extended"
   ret
 }
 
-get_class_code_raw <- function(data, type = c("full", "reduced", "short", "extended"), as_vector=F){
+get_class_code_raw <- function(data, type = c("full", "reduced", "short", "extended"), as_vector = F){
   collapse <- ""
   if(as_vector){
     collapse <- " "
@@ -879,7 +835,7 @@ get_class_code_raw <- function(data, type = c("full", "reduced", "short", "exten
   ret
 }
 
-compare_freq <- function(data1, data2, type="F"){
+compare_freq <- function(data1, data2, type = "F"){
   tt <- bind_rows(
     tibble(source = 1, value=data1[data1$type == type,]$value),
     tibble(source = 2, value=data2[data2$type == type,]$value))
@@ -895,7 +851,7 @@ compare_freq <- function(data1, data2, type="F"){
 hash_wba_dataframe <- function(data){
   num_bytes <- 8
   if(nrow(data) > num_bytes){
-    tl <- nrow(data)-num_bytes
+    tl <- nrow(data) - num_bytes
     data <- data[1:num_bytes,]
     too_long <- TRUE
     print(sprintf("Too long by %d", tl))
@@ -916,13 +872,24 @@ hash_wba <- function(type, direction, len){
   }
   type_val <- as.integer(factor(type, levels = c("A", "C", "D", "F", "J", "R", "T", "X"))) -1
   direction <- ifelse(direction > 0, 1, 0)
-  len <- ifelse(len > 16, 16, len)-1
-  return(16*(8*direction + type_val) + len)
+  len <- ifelse(len > 16, 16, len) - 1
+  return(16 * (8 * direction + type_val) + len)
 }
 
+#' find_wba
+#'
+#' This function parses a interval vector (or corresponding string) into its WBA constituents
+#'
+#' @param x (integer vector or character string) interval sequence
+#' @return Data frame with columns \code{length} (length of atom), \code{type} (WBA type),
+#' \code{value} (interval string),
+#' \code{direction} (direction of atom),
+#' \code{start, end} (start and end position in sequence),
+#' \code{pre_over, post_over} (amount of overlap to previous or following atom.)
+#' @export
 find_wba <- function(x, debug = F){
   if(is.character(x)){
-    x <- pattern_to_vec(x)
+    x <- value_to_vec(x)
   }
   x %>%
     find_classes(debug = debug) %>%
@@ -930,10 +897,50 @@ find_wba <- function(x, debug = F){
     resolve_overlaps(debug = debug)
 }
 
+#' find_wba_by_phrase
+#'
+#' This function parses an \code{int_raw} column of  a data frame into its WBA constituents separately by phrases and optional by id.
+#'  Columns \code{id} and \code{phrase_id} must be present.
+#'
+#' @param data (data.frame) must contain int_raw, id and phrase_id columns,
+#' @param id (string) string specifying id to use, if \code{NULL} the entire data frame is used.
+#' @return Data frame with columns \code{length} (length of atom), \code{type} (WBA type),
+#' \code{value} (interval string),
+#' \code{direction} (direction of atom),
+#' \code{start, end} (start and end position in sequence),
+#' \code{pre_over, post_over} (amount of overlap to previous or following atom.)
+#' @export
+find_wba_by_phrase <- function(data, id = NULL){
+  if(!is.null(id)){
+    data <- data[data$id %in% id,]
+    #message(sprintf("Checking '%s' with %d phrases", paste(id, collapse = ", "), length(unique(data$phrase_id))))
+  }
+  phrases <- unique(data$phrase_id)
+  ret <- list()
+  for(i in phrases){
+    #print(sprintf("Checking phrase %d", i))
+    int_vector <- data[data$phrase_id == i,]$int_raw %>% na.omit()
+    #ignore last interval because it belongs to next phrase
+    tmp <- find_wba(int_vector[1:(length(int_vector)-1)])
+    tmp$phrase_id <- i
+    ret[[i]] <- tmp
+  }
+  ret <- bind_rows(ret)
+  if(!is.null(id)){
+    ret$id <- id
+    ret$id <- as.character(ret$id)
+  }
+  if(nrow(ret[ret$type == "X" & ret$length == 1,])){
+    ret[ret$type == "X" & ret$length == 1,]$type <- "L"
+  }
+  ret
+}
+
+
 recalc_pattern_classes <- function(data){
-  patterns <- lapply(unique(data$value), pattern_to_vec)
+  patterns <- lapply(unique(data$value), value_to_vec)
   patterns_classes <- purrr::map(patterns,
-                                 function(x) data.frame(pattern = vec_to_value(x),
+                                 function(x) tibble(pattern = vec_to_value(x),
                                                         find_wba(x)))
   #pattern_classes <<- purrr::map(patterns_CC, function(x) resolve_overlaps(remove_redundants(x)))
   patterns_classes %>% bind_rows()

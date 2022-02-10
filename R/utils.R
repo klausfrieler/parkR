@@ -32,7 +32,7 @@ is_mcsv2 <- function(obj){
 
 interval_vector_to_pitch <- function(int_vector, start_pitch = 60, root = NULL){
   if(is.character(int_vector)){
-    int_vector <- pattern_to_vec(int_vector)
+    int_vector <- value_to_vec(int_vector)
   }
   pitch_vec <- cumsum(c(start_pitch, int_vector))
   if(!is.null(root)){
@@ -42,7 +42,7 @@ interval_vector_to_pitch <- function(int_vector, start_pitch = 60, root = NULL){
 }
 
 pull_unique <- function(df, var){
-    df %>% pull(!!enquo(var)) %>% unique()
+  df %>% pull(!!enquo(var)) %>% unique()
 }
 
 signed_modulo <- Vectorize(function(x, n){

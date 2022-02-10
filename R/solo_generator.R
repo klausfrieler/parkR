@@ -142,7 +142,7 @@ realize_diatonic <- function(direction, length, start_pitch, chord, pitch_range)
 
 realize_direct <- function(value, start_pitch){
   if(is.character(value)){
-    value <- pattern_to_vec(value)
+    value <- value_to_vec(value)
   }
   cumsum(c(start_pitch, value))
 }
