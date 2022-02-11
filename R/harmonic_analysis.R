@@ -514,7 +514,7 @@ enhance_irb_chords <- function(fname){
     mutate(chord_pos = 1:n(),
            chord_id = sprintf("%d-%s", compid, chord_pos)) %>%
     mutate(key_pc = str_split_fixed(key, "-", 2)[,1] %>% tone_name_to_pc() %>% as.vector(),
-           pc_rel = (pc - key_pc) %%12) %>%
+           pc_rel = (pc - key_pc) %% 12) %>%
     mutate(
            next_chord = lead(chord),
            over_next_chord = lead(chord, 2),
