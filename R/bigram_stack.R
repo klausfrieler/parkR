@@ -34,6 +34,7 @@ build_bigram_stack <- function(x, max_level = 3, sd_threshold = 1.0, ids = NULL,
   if(is.character(x)){
     x <- as.integer(factor(x))
   }
+  early_break <- FALSE
   benc <- bigram_encoder(as.integer(x), level = 1)
   ret[[1]] <- benc
   sd_xy <- sd(ret[[1]]$n_xy)
@@ -46,6 +47,7 @@ build_bigram_stack <- function(x, max_level = 3, sd_threshold = 1.0, ids = NULL,
       if(sd_xy <= sd_threshold){
         messagef("Threshold reached, finishing up.")
         ret[[m]] <- NULL
+        early_break <- TRUE
         break
       }
     }
@@ -61,9 +63,13 @@ build_bigram_stack <- function(x, max_level = 3, sd_threshold = 1.0, ids = NULL,
         ids <- ids$id
     }
     messagef("Adding ids")
-    ret <- ret %>% arrange(pos)
-    ret$id <- rep(ids, each = max_level)
-    #ret <- ret %>% left_join(tibble(pos = 1:length(ids), id = unique(ids)), by = "pos")
+    if(!early_break){
+      ret <- ret %>% arrange(pos)
+      ret$id <- rep(ids, each = max_level)
+    }
+    else{
+      ret <- ret %>% left_join(tibble(pos = 1:length(ids), id = unique(ids)), by = "pos")
+    }
     messagef("Adding document frequencies")
     ret <- ret %>% group_by(bigram_id) %>% mutate(DF = n_distinct(id)) %>% ungroup()
   } else{
@@ -252,7 +258,7 @@ ngram_analysis <- function(x, max_level = Inf, with_overlap = T, min_level = 2, 
                       min_DF = min_DF,
                       with_overlap = with_overlap,
                       excess_n = excess_n)
-  browser()
+  #browser()
   bricks <- bs %>%
     filter(nchar(cover_ids)> 0, level == 1) %>%
     count(cover_ids) %>%
@@ -286,7 +292,7 @@ get_tf_idf <- function(bigram_stack){
   n_d <- bigram_stack %>% group_by(id, bigram_id) %>%
     summarise(n_d = length(id)) %>%
     ungroup()
-  browser()
+  #browser()
   bigram_stack <- bigram_stack %>% left_join(n_d, by = c("id", "bigram_id"))
   bigram_stack <- bigram_stack %>%
     group_by(id, level) %>%
@@ -294,7 +300,7 @@ get_tf_idf <- function(bigram_stack){
     ungroup()
 
   #bigram_stack <- bigram_stack %>% left_join(max_n_d, by = c("id", "level"))
-  browser()
+  #browser()
   bigram_stack <- bigram_stack %>% mutate(tf = n_d/max_n_d, idf = log(N/DF), tf_idf = tf * idf)
 
   bigram_stack
@@ -310,8 +316,10 @@ distribution_similarity <- function(x, y){
   joint <- joint/sum(joint)
   tx <- tx/sum(tx)
   ty <- ty/sum(ty)
-
   tv <- 1 - .5 * sum(abs(tx - ty))
+  if(tv < 0 || tv > 1){
+    browser()
+  }
   tv
 }
 
@@ -360,7 +368,8 @@ get_pattern_similarity_matrix <- function(bigram_stack, levels, group_var = "id"
       mutate(z_d_n = scale(d_n)) %>%
       ungroup() %>%
       group_by(group1, group2) %>%
-      summarise(sim = mean(z_d_n))
+      summarise(sim = mean(d_n), z_sim = mean(z_d_n), .groups = "drop")
+
   ret <- ret %>% rename(group1 = group2, group2 = group1) %>% bind_rows(ret)
   if(sort_by_sim){
     group_levels <- ret %>% group_by(group1) %>% summarise(s = mean(sim)) %>% arrange((s)) %>% pull(group1)
@@ -406,6 +415,7 @@ get_coverage <- function(bigram_stack, level, min_n, min_DF, with_overlap = T){
 
   })
 }
+
 get_coverage_by_set <- function(bigram_stack, bigram_set){
   total_pos <- bigram_stack %>% filter(level == 1) %>% nrow()
   tmp <- bigram_stack %>%

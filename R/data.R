@@ -75,3 +75,54 @@ NULL
 #' @name F_blues
 #' @docType data
 NULL
+
+
+#' wjd_transforms
+#'
+#' Some basic raw features from the Weimar Jazz Database (WJD) (\code{"id, beat13, beatall, phrasbeg, phrasend, cdpcx_raw_all, cpc_raw_all, chord_types_raw, chords_raw, phrase_id_raw, mcm_48, pitch_raw, fuzzyint_raw, int_raw, ioiclass_abs_raw, ioiclass_rel_raw, parsons_raw, style"})
+#' @name wjd_transforms
+#' @docType data
+NULL
+
+#' wjd_features
+#'
+#' Some basic scalar features from the Weimar Jazz Database (WJD) (\code{""})
+#' @name wjd_features
+#' @docType data
+NULL
+
+
+#' wjd_meta
+#'
+#' Metadata for the  Weimar Jazz Database (WJD) solos (\code{"id, number_notes, avgtempo, chord_changes, chorus_count, composer, filename_sv, form, full_title, genre, harmony_template, instrument, key, label, lineup, mbzid, performer, recordbib, recordingdate, recordingyear, recordtitle, rhythmfeel, signature, solo_time, soloend, solopart, solostart, status, style, tempoclass, title, titleaddon, tonality_type"})
+#' @name wjd_transforms
+#' @docType data
+NULL
+
+#' omnibook_transforms
+#'
+#' Some basic raw features from the Weimar Jazz Database (WJD) (\code{"id, beat1, beat3, beatall, phrasbeg, phrasend, cdpcx_raw_all, cpc_raw_all, durclass_abs_raw, durclass_rel_raw, metrical_position, chord_types_raw, chords_raw, phrase_id_raw, mcm_48, pitch_raw, fuzzyint_raw, int_raw, ioiclass_abs_raw, ioiclass_rel_raw, pos"})
+#' @name omnibook_transforms
+#' @docType data
+NULL
+
+#' omnibook_meta
+#'
+#' Metadata for the  Charlie Parker Omnibook (CPO) solos (\code{"omnibook_meta"})
+#' @name omnibook_meta
+#' @docType data
+NULL
+
+#' esac_transforms
+#'
+#' Some basic raw features from the Essen Folk Song Database (EFSC) (\code{"id, int_raw, ioiclass_abs_raw, ioiclass_rel_raw, mcm_48"})
+#' @name esac_transforms
+#' @docType data
+NULL
+
+#' esac_meta
+#'
+#' Metadata for the  Essen Folk Song Database (EFSC) (\code{"id, cnr, collection, comment, esac_key, esac_title, function., melstring, region, signature, source, text, tunefamily, unit"})
+#' @name esac_meta
+#' @docType data
+NULL
