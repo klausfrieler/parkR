@@ -66,16 +66,31 @@ chord_definitions[["maj7"]][["scale_weights"]] <- c(1.0, 0.0, 0.0)
 chord_definitions[["maj7"]][["arpeggio"]] <- c(-12, -8, -5, -1, 0, 4, 7, 11, 12 + 2, 12 + 6, 12 + 9)
 
 chord_definitions[["maj"]] <- chord_definitions[["maj7"]]
+chord_definitions[["6"]] <- chord_definitions[["maj7"]]
+
 chord_definitions[["min7"]][["scales"]] <- list("dorian" = dorian,
                                                 "aeolian" = aeolian,
                                                 "melodic_minor" = melodic_minor,
                                                 "harmonic_minor" = harmonic_minor,
                                                 "min_7_tetra" = min_7_tetra)
-#chord_definitions[["min7"]][["scale_weights"]] <- c(.7, .2, .05, .05)
 chord_definitions[["min7"]][["scale_weights"]] <- c(1., 0.0, 0.0, 0.0, 0.0)
 chord_definitions[["min7"]][["arpeggio"]] <- c(-12, -9, -5, -2, 0, 3, 7, 10, 12 + 2, 12 + 5, 12 + 9)
 
 chord_definitions[["min"]] <- chord_definitions[["min7"]]
+
+chord_definitions[["minb6"]][["scales"]] <- list("aeolian" = aeolian,
+                                                "harmonic_minor" = harmonic_minor)
+chord_definitions[["minb6"]][["scale_weights"]] <- c(1., 0.0)
+chord_definitions[["minb6"]][["arpeggio"]] <- c(-12, -9, -5, -3, 0, 3, 7, 8, 12 + 2, 12 + 5)
+
+chord_definitions[["min6"]][["arpeggio"]] <- c(-12, -9, -5, -4, 0, 3, 7, 9, 12, 12 + 3)
+chord_definitions[["min6"]][["scales"]] <- list("dorian" = dorian)
+chord_definitions[["min6"]][["scale_weights"]] <- c(1.0)
+
+chord_definitions[["minmaj7"]][["arpeggio"]] <- c(-12, -9, -5, -1, 0, 3, 7, 11, 12, 12 + 3)
+chord_definitions[["minmaj7"]][["scales"]] <- list("harmonic_minor" = harmonic_minor)
+chord_definitions[["minmaj7"]][["scale_weights"]] <- c(1.0)
+
 
 chord_definitions[["7"]][["scales"]] <- list("mixolydian" = mixolydian,
                                              "mixolydian_sharp11" = mixolydian_sharp11,
@@ -101,14 +116,8 @@ chord_definitions[["o7"]][["scales"]] <- list("gtht" = gtht,
                                               "dom_blues" = (major_blues + 6) %% 12)
 #chord_definitions[["o7"]][["scale_weights"]] <- c(.8, .2)
 chord_definitions[["o7"]][["scale_weights"]] <- c(1.0, 0.0, 0.0, 0.0)
+chord_definitions[["o"]] <- chord_definitions[["o7"]]
 
-chord_definitions[["min6"]][["arpeggio"]] <- c(-12, -9, -5, -4, 0, 3, 7, 9, 12, 12 + 3)
-chord_definitions[["min6"]][["scales"]] <- list("dorian" = dorian)
-chord_definitions[["min6"]][["scale_weights"]] <- c(1.0)
-
-chord_definitions[["minmaj7"]][["arpeggio"]] <- c(-12, -9, -5, -1, 0, 3, 7, 11, 12, 12 + 3)
-chord_definitions[["minmaj7"]][["scales"]] <- list("harmonic_minor" = harmonic_minor)
-chord_definitions[["minmaj7"]][["scale_weights"]] <- c(1.0)
 
 chord_types <- c("minmaj7", "maj7", "min7", "min6","minb6", "min", "maj", "m7b5", "o7", "o", "7", "6")
 extensions <- c("add9", "add3", "sus", "b5", "alt", "\\+", "9b", "9#", "9", "11#", "11", "13b", "13" )
@@ -167,7 +176,7 @@ tone_name_to_pc <- Vectorize(function(tone){
     pc <- sharp_pc -1
   }
   else {
-    message(sprintf("Invalid tone %s", tone))
+    messagef("Invalid tone %s", tone)
     stop()
     return(NA)
   }
@@ -261,7 +270,7 @@ parse_chord <- function(chord_label){
     }
     else {
       messagef("Parsing %s", chord_label)
-      message(sprintf("Unknown chord type in %s", chord_label))
+      messagef("Unknown chord type in %s", chord_label)
       stop()
       return(NULL)
     }
@@ -308,6 +317,9 @@ find_best_match_to_chord <- function(int_vector, start_pitch, chord, max_transpo
     int_vector <- value_to_vec(int_vector)
   }
   tmp <- get_scale_pitches(chord, sample = F, return_weights = T)
+  if(is.null(tmp)){
+    return(integer(0))
+  }
   scales <- tmp$scales
   scale_weights <- tmp$weights
   best_trans <- max_transposition + 1
@@ -335,6 +347,9 @@ weighted_sample <- function(sample_set, weights, size = 1){
   w <- as.integer(round(weights / sum(weights) * 100))
   #print(w)
   #print(sample_set)
+  if(is.null(sample_set)){
+    browser()
+  }
   if(is.null(names(sample_set))){
     names(sample_set) <- 1: length(sample_set)
   }
@@ -358,6 +373,11 @@ get_scale_pitches <- function(chord, min_pitch = 48, max_pitch = 84, sample = T,
       return(NULL)
     }
   }
+  if(chord$type == "NC"){
+    message("[get_scale_pitches] Found NC chord")
+    return(NULL)
+  }
+
   #print(chord)
   for(i in 1:nrow(chord)){
     ct <- chord[i, ]$type
@@ -455,24 +475,35 @@ unroll_durations <- function(durations){
   tmp
 }
 
-#' create_from_irb
+#' create_leadhseet_chord_db
 #'
-#' This function generates a lead sheet data from parsed iRealBook data (irb),
+#' This function generates a lead sheet data from parsed chord data frame (irb or wjd_chord_db),
 #'
-#' @param compid (integer or character scalar) If integer, then id of lead sheet in the iRealBook data (data(irb)), if character, than title of song
+#' @param db (chord data frame) Chord data frame to use
+#' @param compid (integer or character scalar) If integer, then id of lead sheet in the chord data, if character, than title of song
 #' @param name (character scalar) Currently unused
 #' @param with_form (logical scalar) Flag if form shall be added
 #' @return A leed sheet data frame
 #' @export
-create_from_irb <- function(compid, name = NULL, with_form = F){
+create_leadsheet_from_chord_db <- function(db, compid, name = NULL, with_form = F){
   if(is.character(compid)){
-    sheet <- parkR::irb[tolower(parkR::irb$title) == tolower(compid),] %>%
+    sheet <- db %>% filter(tolower(title) == tolower(!!compid)) %>%
       select(chord, duration, section, title, time, composer, date, compid, key)
   }
   else {
-    sheet <- parkR::irb[parkR::irb$compid == compid,] %>% select(chord, duration, title, time)
+    sheet <- db %>% filter(compid == !!compid) %>% select(chord, duration, title, time)
   }
-  time <- strsplit(sheet$time[1], "/")[[1]]
+  if(nrow(sheet) == 1){
+    return(NULL)
+  }
+  if(!nzchar(sheet$time[1])){
+    time <- c("4", "4")
+  }
+  else{
+    time <- strsplit(sheet$time[1], "/")[[1]]
+
+  }
+  #browser()
   period <- as.integer(time[1])
   denom <- as.integer(time[2])
   if(period == 6 && denom == 8){
@@ -486,7 +517,6 @@ create_from_irb <- function(compid, name = NULL, with_form = F){
     mutate(length_ticks = duration * ticks_per_beat) %>%
     mutate(parsed = purrr::map(chord, parse_chord)) %>%
     tidyr::unnest(cols = parsed)
-
   sheet$onset_ticks <- unroll_durations(sheet$length_ticks)
   sheet$running_beat <- unroll_durations(sheet$duration)
   sheet$beat <- (sheet$running_beat %% period ) + 1
@@ -504,7 +534,37 @@ create_from_irb <- function(compid, name = NULL, with_form = F){
   sheet %>% set_format("lead_sheet")
 }
 
-#' create_sheet
+
+#' create_leadsheet_from_irb
+#'
+#' This function generates a lead sheet data from parsed iRealBook data (irb),
+#'
+#' @param compid (integer or character scalar) If integer, then id of lead sheet in the iRealBook data (data(irb)), if character, than title of song
+#' @param name (character scalar) Currently unused
+#' @param with_form (logical scalar) Flag if form shall be added
+#' @return A leed sheet data frame
+#' @export
+create_leadsheet_from_irb <- function(compid, name = NULL, with_form = F){
+  create_leadsheet_from_chord_db(parkR::irb, compid, name, with_form)
+}
+
+#' create_leadsheet_from_wjd_db
+#'
+#' This function generates a lead sheet data from parsed WJD chord data (wjd_chord_db),
+#'
+#' @param compid (integer or character scalar) If integer, then id of lead sheet in the iRealBook data (data(irb)), if character, than title of song
+#' @param name (character scalar) Currently unused
+#' @param with_form (logical scalar) Flag if form shall be added
+#' @return A leed sheet data frame
+#' @export
+create_leadsheet_from_wjd_db <- function(compid, name = NULL, with_form = F){
+  db <- parkR::wjd_chord_db %>%
+    rename(chord = original) %>%
+    left_join(parkR::wjd_meta %>% select(title, id, time = signature), by = "id")
+  create_leadsheet_from_chord_db(db, compid, name, with_form)
+}
+
+#' create_leadsheet
 #'
 #' This function generates a lead sheet data frame from a vector of chord symbols and beat lengths per chord
 #'
@@ -513,7 +573,7 @@ create_from_irb <- function(compid, name = NULL, with_form = F){
 #' @param length_beats (integer scalar) length of chord in beats
 #' @return A leed sheet data frame
 #' @export
-create_sheet <- function(name, chords, length_beats){
+create_leadsheet <- function(name, chords, length_beats){
   tmp <- tibble(chord = chords,
                   length_beats = length_beats)
   tmp <- tmp %>% mutate(length_ticks = length_beats * 4) %>%
@@ -526,6 +586,37 @@ create_sheet <- function(name, chords, length_beats){
   tmp %>% set_format("lead_sheet")
 }
 
+#' simulate_wjd
+#'
+#' This function simulates a full Weimar Jazz Database, based on lead sheet, chorus counts and tempo
+#'
+#' @param ids (integer vector) List of ids to create, ids shoudl be in the range 1 to 456, everything else will be ignored
+#' @return A data frame of generated solos
+#' @export
+simulate_wjd <- function(ids = 1:456){
+  wjd_meta <- parkR::wjd_meta %>% mutate(compid = as.integer(factor(id)))
+  ids <- as.integer(ids)
+  ids <- ids[ids >= 1 ] & ids[ids <= 456 ]
+  map_dfr(ids, function(cid) {
+    #messagef("Generating %d...", cid)
+    sheet <- create_leadsheet_from_wjd_db(compid = cid)
+    if(!is.null(sheet)){
+      md <- wjd_meta %>% filter(compid == cid)
+      message(sprintf("(%d): Generating %s with %d choruses", cid, md$id, md$chorus_count))
+      solo <- generate_solo(sheet, n_chorus = md$chorus_count, tempo = round(md$avgtempo))
+      if(!is.null(solo)){
+      solo <- solo %>%
+        mutate(id = md$id,
+               # compid = md$compid,
+               # title = md$title,
+               # n_chorus = md$chorus_count,
+               # tempo = round(md$avgtempo),
+               .before = 1)
+      }
+      solo
+    }
+    })
+}
 parse_wjd_bar <- function(bar_chords, bar_number = 1){
   #print(bar_chords)
   elements <- strsplit(bar_chords, " ")[[1]]
@@ -598,6 +689,7 @@ signed_mod <- function(x, n = 12){
   r[which(r > n/2)]  <- r[which(r > n/2)] - n
   r
 }
+
 create_sheet_from_wjd_changes <- function(changes, form_parts = NULL){
   purrr::map2_dfr(changes$chord_changes,
            changes$id,
@@ -614,6 +706,11 @@ create_sheet_from_wjd_changes <- function(changes, form_parts = NULL){
     ungroup() %>%
     left_join(changes, by ="id")
 
+}
+
+#' export
+get_random_chord <- function(chord_db = parkR::irb){
+  sprintf("%s%s", sample(chord_db$root, 1), sample(chord_db$type, 1))
 }
 
 expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL, with_key_analysis = T){

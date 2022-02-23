@@ -5,5 +5,5 @@
 \alias{phrase_begin_dist}
 \title{phrase_begin_dist}
 \description{
-Distribution of WBA atoms at beginning of phrases
+Distribution of WBA atoms at beginning of phrases extracted from the Weimar Jazz Database
 }

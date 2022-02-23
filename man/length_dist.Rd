@@ -5,5 +5,5 @@
 \alias{length_dist}
 \title{length_dist}
 \description{
-Disbtribution of number of phrases over WJD solos
+Disbtribution of number of phrases over WJD solos extracted from the Weimar Jazz Database
 }

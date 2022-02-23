@@ -5,5 +5,5 @@
 \alias{succ_ioiclass}
 \title{succ_ioiclass}
 \description{
-First order Markov transitions of interonset interval classes
+First order Markov transitions of interonset interval classes extracted from the Weimar Jazz Database
 }

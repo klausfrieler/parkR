@@ -5,5 +5,5 @@
 \alias{WBA_df}
 \title{WBA_df}
 \description{
-Database of WBA atoms
+Database of WBA atoms extracted from the Weimar Jazz Database.
 }

@@ -1,6 +1,4 @@
 library(tidyverse)
-printf <- function(...) print(sprintf(...))
-messagef <- function(...) message(sprintf(...))
 
 bigram_encoder <- function(x, level = 1, sep = ""){
   #if(is.character(x)){

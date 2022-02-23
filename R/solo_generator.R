@@ -94,6 +94,10 @@ solo_to_mcsv2 <- function(solo_tbl, tempo = 120){
 
 realize_arpeggio <- function(direction,length, start_pitch, chord, pitch_range = c(48, 84)){
   direction <- sign(direction)
+  if(chord == "NC"){
+    chord <- get_random_chord()
+    #message(sprintf("[realize_arpeggio]: Found NC, substituting %s", chord))
+  }
   chord <- parse_chord(chord)
   root_pc <- chord$pc
   chord_type <- chord$type
@@ -107,9 +111,12 @@ realize_arpeggio <- function(direction,length, start_pitch, chord, pitch_range =
   if(length(pos) == 0){
     pos <- which.min(abs(arpeggio_pitches - start_pitch))
     pitches <- start_pitch
-    message("ARPEGGIO: Added link at beginning")
+    messagef("ARPEGGIO: Added link at beginning")
   }
   #print(seq(pos, pos + direction * length - 1*direction, direction))
+  if(length(pos) == 0 || length(pos + direction * length) == 0){
+    browser()
+  }
   pitches <- c(pitches, arpeggio_pitches[safe_seq(pos, pos + direction * length)])
   #print(paste(pc_labels_flat[pitches %% 12 + 1], collapse=" "))
   pitches
@@ -124,6 +131,12 @@ realize_chromatic <- function(direction, length, start_pitch, chord, pitch_range
 
 realize_diatonic <- function(direction, length, start_pitch, chord, pitch_range){
   direction <- sign(direction)
+
+  if(chord == "NC"){
+    chord <- get_random_chord()
+    #message(sprintf("[realize_diatonic]: Found NC, substituting %s", chord))
+  }
+
   chord_pitches <- get_scale_pitches(chord,
                                      min_pitch = 0,
                                      max_pitch = 127)
@@ -134,8 +147,12 @@ realize_diatonic <- function(direction, length, start_pitch, chord, pitch_range)
     pitches <- start_pitch
     pos <- which.min(abs(chord_pitches - start_pitch))
     #pretty_print_pitches(pitches)
-    message("DIATONIC: Added link at beginning")
+    messagef("DIATONIC: Added link at beginning")
   }
+  if(length(pos) == 0 || length(pos + direction * length) == 0){
+    browser()
+  }
+
   c(pitches, chord_pitches[safe_seq(pos, pos + direction * length)])
 
 }
@@ -148,6 +165,10 @@ realize_direct <- function(value, start_pitch){
 }
 
 realize_X <- function(value, start_pitch, chord){
+  if(chord == "NC"){
+    chord <- get_random_chord()
+    #message(sprintf("[realize_X]: Found NC, substituting %s", chord))
+  }
   find_best_match_to_chord(value, start_pitch, chord)
 }
 
@@ -182,28 +203,28 @@ realize_wb_atom <- function(type,
     #printf("Excluded %s", type)
     return(NULL)
   }
-  message(sprintf("Realizing atom '%s' with value %s, direction = %d, and length %d on pitch %d over chord %s",
-                  type, value, direction, length, start_pitch, chord))
+  messagef("Realizing atom '%s' with value %s, direction = %d, and length %d on pitch %d over chord %s",
+                  type, value, direction, length, start_pitch, chord)
   rel_reg_pos <- relative_register_position(start_pitch, pitch_range)
   if(rel_reg_pos > .7 && direction > 0){
     if(type %in% c("C", "D", "A")) {
       direction <- (-direction)
-      message("Changed direction from up to down")
+      messagef("Changed direction from up to down")
     }
     else{
       start_pitch <- start_pitch - 7
-      message(sprintf("Adjusted start pitch from %d to %d", start_pitch + 7, start_pitch))
+      messagef(sprintf("Adjusted start pitch from %d to %d", start_pitch + 7, start_pitch))
     }
 
   }
   if(rel_reg_pos < .3 && direction < 0){
     if(type %in% c("C", "D", "A")) {
       direction <- (-direction)
-      message("Changed direction from down to up")
+      messagef("Changed direction from down to up")
     }
     else{
       start_pitch <- start_pitch + 7
-      message(sprintf("Adjusted start pitch from %d to %d", start_pitch - 7, start_pitch))
+      messagef("Adjusted start pitch from %d to %d", start_pitch - 7, start_pitch)
     }
   }
 
@@ -245,13 +266,21 @@ get_current_chord <- function(chord_sequence, start_ticks){
 }
 
 get_start_pitch <- function(chord, pitch_range = c(48, 84)){
+  if(chord == "NC"){
+    chord <- get_random_chord()
+    #message(sprintf("[get_start_pitch]: Found NC, substituting  %s", chord))
+  }
   chord <- parse_chord(chord)
   #printf("Chord '%s'", chord)
   chord_type <- chord$type
   root_pc <- chord$pc
   octave <- floor(mean(pitch_range)/12)
   base_arp <- chord_definitions[[chord_type]]$arpeggio
-  base_arp <- base_arp[abs(base_arp)<=12]
+  if(is.null(base_arp)){
+    print(chord_type)
+    browser()
+  }
+  base_arp <- base_arp[abs(base_arp) <= 12]
   candidates <-base_arp + 12 * octave + root_pc
   candidates <- candidates[candidates>=pitch_range[1]+5 & candidates<=pitch_range[2]-5]
   #print(candidates)
@@ -323,6 +352,7 @@ generate_phrase_over_chords <- function(lead_sheet,
 
   #first find and generate start atom
   while(!okay){
+    #browser()
     start_atom <- parkR::phrase_begin_dist %>% sample_n(1)
     #print(sprintf("Start: %s (%s)",  start$value, start$type))
     if(mlu == "line" && start_atom$type == "R"){
@@ -415,7 +445,7 @@ generate_phrase_over_chords <- function(lead_sheet,
                        type = row$type,
                        chord = current_chord$chord)
   }
-  bind_rows(ret)
+  bind_rows(ret) %>% mutate(mlu = mlu)
 }
 
 #' generate_solo
@@ -436,14 +466,22 @@ generate_solo <- function(lead_sheet,
                           tempo = 120,
                           lick_to_line_ratio = .5,
                           excludes = NULL){
+  if(is.null(lead_sheet)){
+    return(NULL)
+  }
   start_mpos = 0
   ret <- list()
   current_ticks <- sample(0:7, 1)
-
   max_chorus_ticks <- sum(lead_sheet$length_ticks)
   max_ticks <- n_chorus * max_chorus_ticks
   phrase_id <- 1
   current_chorus_id <- 1
+  if(max_ticks <= 16){
+    message(sprintf("Lead sheet %s too short (rows = %d, max ticks = %d), bailing out",
+                    lead_sheet$title[1], nrow(lead_sheet),
+                    max_ticks))
+    return(NULL)
+  }
   while(current_ticks < (max_ticks - 16)){
     mlu <- ifelse(stats::runif(1) < lick_to_line_ratio, "lick", "line")
     if(phrase_id == 1){
@@ -459,7 +497,7 @@ generate_solo <- function(lead_sheet,
     ret[[phrase_id]]$mpos <- ret[[phrase_id]]$mpos + (current_chorus_id - 1)*max_chorus_ticks
     ret[[phrase_id]]$phrase_id <- phrase_id
     ret[[phrase_id]]$chorus_id <- current_chorus_id
-    phrase_break <- sample(0:15, 1)
+    phrase_break <- sample(parkr_options()$phrase_breaks, 1)
     current_ticks <- current_ticks + sum(ret[[phrase_id]]$iois) + phrase_break
     current_chorus_id <- floor(current_ticks/max_chorus_ticks) + 1
     #printf("Current ticks %d (max %d, chorus %d), current chorus: %d", current_ticks, max_ticks, max_chorus_ticks, current_chorus_id)
@@ -489,7 +527,7 @@ make_many_solos <- function(n,
     #seed<-sample(n)
     set.seed(i)
     tmp_name <- sprintf("%s%d.csv", fname, i)
-    message(sprintf("Writing to %s", tmp_name))
+    messagef("Writing to %s", tmp_name)
     generate_chorus(lead_sheet,
                     lick_to_line_ratio = lick_to_line_ratio,
                     excludes = excludes) %>%

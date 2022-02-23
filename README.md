@@ -41,7 +41,7 @@ More lead sheets can be found in the irb and wjd_chord_db data sets, incorporate
 ```
   library(tidyverse)
   library(parkR)
-  create_from_irb("All the things you are") %>% 
+  create_leadsheet_from_irb("All the things you are") %>% 
     generate_solo(n_chorus = 2) %>% 
     solo_to_mcsv2() %>%  
     write_mcsv2("all_the_things_you_are.csv")

@@ -5,5 +5,5 @@
 \alias{wba_mla}
 \title{wba_mla}
 \description{
-Database of WBA atoms and midlevel units (MLUs)
+Database of WBA atoms and midlevel units (MLUs) extracted from the Weimar Jazz Database
 }

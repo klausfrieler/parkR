@@ -1,7 +1,7 @@
 library(tidyverse)
 
-messagef <- function(...) message(sprintf(...))
 printf <- function(...) print(sprintf(...))
+messagef <- function(...) if(parkR::parkr_options()$debug) message(sprintf(...))
 
 value_to_vec <- function(value_str){
   vec <- gsub("\\[", "", as.character(value_str))

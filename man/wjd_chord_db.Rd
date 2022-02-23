@@ -5,5 +5,5 @@
 \alias{wjd_chord_db}
 \title{WJD chords}
 \description{
-Chord changes /lead sheets extracted from the Weimar Jazz Database
+Chord changes & lead sheets extracted from the Weimar Jazz Database
 }

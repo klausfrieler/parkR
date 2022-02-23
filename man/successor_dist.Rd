@@ -5,5 +5,5 @@
 \alias{successor_dist}
 \title{successor_dist}
 \description{
-First order Markov transitions of WBA atoms
+First order Markov transitions of WBA atoms extracted from the Weimar Jazz Database
 }

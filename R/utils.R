@@ -41,10 +41,12 @@ interval_vector_to_pitch <- function(int_vector, start_pitch = 60, root = NULL){
   pitch_vec
 }
 
+#' @export
 pull_unique <- function(df, var){
   df %>% pull(!!enquo(var)) %>% unique()
 }
 
+#' @export
 signed_modulo <- Vectorize(function(x, n){
   if(is.na(x)){
     return(NA)
@@ -56,6 +58,7 @@ signed_modulo <- Vectorize(function(x, n){
   t
 })
 
+#' @export
 freq_table <- function(x, prop_var, sort = T) {
   prop_var  <- enquo(prop_var)
 
@@ -70,6 +73,7 @@ freq_table <- function(x, prop_var, sort = T) {
   #tmp %>% ggplot(aes_string(x = rlang::quo_text(prop_var), y= "freq")) + geom_col()
 }
 
+#' @export
 freq2_table <- function(x, group_var, prop_var, sort = T) {
   group_var <- enquo(group_var)
   prop_var  <- enquo(prop_var)
@@ -157,6 +161,7 @@ get_all_chord_tone_links <- function(data){
     })
   solo_links
 }
+
 last_n <- function(x, n = 1){
   x[length(x) - n + 1]
 }
