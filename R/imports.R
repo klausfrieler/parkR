@@ -22,6 +22,8 @@ NULL
 #' @import tidyr
 NULL
 
+#' @import tabr
+NULL
 
 #' @importFrom stats chisq.test
 NULL

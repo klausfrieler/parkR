@@ -95,7 +95,7 @@ form_from_sections <- function(sections){
 }
 
 form_from_sheet <- function(sheet){
-  sheet$section_start <- sheet$section != lag(sheet$section)
+  sheet$section_start <- sheet$section != dplyr::lag(sheet$section)
   sheet$section_start[1] <- TRUE
   start_bars <- sheet[sheet$section_start,]$bar
   period <- as.integer(strsplit(sheet$time[1], "/")[[1]][1])

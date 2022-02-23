@@ -24,7 +24,8 @@ Imports:
     purrrlyr,
     tidyr,
     stringr,
-    stats
+    stats,
+    tabr
 Suggests:
     devtools (>= 1.13.6)
 RoxygenNote: 7.1.1

@@ -1,10 +1,4 @@
-# source("./interval_grammar.R")
-# source("./chords.R")
-# source("./utils.R")
-library(tidyverse)
-
 g_counter <- 0
-
 
 sample_iois <- function(size = 10, start = 1){
 
@@ -25,71 +19,6 @@ sample_iois <- function(size = 10, start = 1){
 
 
 
-#' phrase_to_mcsv2
-#'
-#' This function format a generated phrase to mcsv2-like data fraem
-#'
-#' @param phrase_tbl (data frame) generated phrase data.frame
-#' @param tempo (double scale) Tempo (bpm) of  the generated solo.
-#' @param phrase_id (integer scalar) Id of phrase for coordination
-#' @param chorus_id (integer scalar) Id of chorus for coordination
-#' @return A solo data frame in MCSV2 format
-#' @export
-phrase_to_mcsv2 <- function(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 1){
-  #print(phrase_tbl)
-  final <- tibble(
-    bar = as.integer(floor(phrase_tbl$mpos / 16)) + 1,
-    beat = as.integer(floor(phrase_tbl$mpos / 4) %% 4) + 1,
-    tatum = as.integer(phrase_tbl$mpos %%4) + 1
-  )
-
-  T <- 60/tempo
-  final$beat_duration <- T
-  final$division <- 4
-  final$period <- 4
-  final$signature <- "4/4"
-  final$phrase_id <- phrase_id
-  final$phrase_begin <- 0
-  final$phrase_begin[1] <- 1
-  final$chorus_id <- chorus_id
-  final$onset <- phrase_tbl$mpos / 4 * T
-  final$duration <- phrase_tbl$iois*T/4
-  final$pitch <- phrase_tbl$pitch
-  final$chord <-phrase_tbl$chord
-  return(final[, c("onset", "duration", "period", "division", "bar", "beat", "tatum", "beat_duration", "signature", "pitch", "phrase_id", "phrase_begin", "chord", "chorus_id")])
-}
-
-#' chorus_to_mcsv2
-#'
-#' This function formats a generated chorus to mcsv2-compatible data fraem
-#'
-#' @param chorus_tbl (data frame) generated phrases in data.frame
-#' @param tempo (double scale) Tempo (bpm) of  the generated solo.
-#' @param chorus_id (integer scalar) Id of chorus for coordination
-#' @return A solo data frame in MCSV2 format
-#' @export
-chorus_to_mcsv2 <- function(chorus_tbl, tempo = 120, chorus_id = 1){
-  #print(phrase_tbl)
-  purrr::map_dfr(unique(chorus_tbl$phrase_id), function(p_id){
-    phrase_to_mcsv2(chorus_tbl %>% filter(phrase_id == p_id),
-                    tempo = tempo, phrase_id = p_id, chorus_id = chorus_id)
-  }) %>% set_format("mcsv2")
-}
-
-#' solo_to_mcsv2
-#'
-#' This function formats a generated solo to mcsv2-compatible data fraem
-#'
-#' @param solo_tbl (data frame) generated phrases in data.frame
-#' @param tempo (double scale) Tempo (bpm) of  the generated solo.
-#' @return A solo data frame in MCSV2 format
-#' @export
-solo_to_mcsv2 <- function(solo_tbl, tempo = 120){
-  #print(phrase_tbl)
-  purrr::map_dfr(unique(solo_tbl$chorus_id), function(c_id){
-      chorus_to_mcsv2(solo_tbl %>% filter(chorus_id == c_id), tempo = tempo, chorus_id = c_id)
-  }) %>% set_format("mcsv2")
-}
 
 
 realize_arpeggio <- function(direction,length, start_pitch, chord, pitch_range = c(48, 84)){
@@ -503,7 +432,7 @@ generate_solo <- function(lead_sheet,
     #printf("Current ticks %d (max %d, chorus %d), current chorus: %d", current_ticks, max_ticks, max_chorus_ticks, current_chorus_id)
     phrase_id <- phrase_id + 1
   }
-  bind_rows(ret) %>% set_format("solo_df") %>% filter(mpos <= max_ticks)
+  bind_rows(ret) %>% set_format("solo_df") %>% filter(mpos <= max_ticks) %>% rename(ioi = iois)
 }
 
 #' make_many_solos

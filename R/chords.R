@@ -1,4 +1,4 @@
-library(tidyverse)
+#library(tidyverse)
 #source("utils.R")
 pc_labels<-c("C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "Bb", "B")
 pc_labels_sharp<-c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
@@ -667,7 +667,7 @@ split_wjd_changes <- function(changes, id = ""){
     mutate(form_length = max(bar_number)) %>%
     ungroup() %>%
     distinct(form_name, form_length) %>%
-    mutate(bar_offset = lag(cumsum(form_length), default = 0))
+    mutate(bar_offset = dplyr::lag(cumsum(form_length), default = 0))
   parts <-
     parts %>%
     left_join(offsets, by = "form_name") %>%

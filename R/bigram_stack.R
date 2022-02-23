@@ -1,4 +1,4 @@
-library(tidyverse)
+#library(tidyverse)
 
 bigram_encoder <- function(x, level = 1, sep = ""){
   #if(is.character(x)){
