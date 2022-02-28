@@ -4,7 +4,7 @@
 \alias{solo_to_lilypond}
 \title{solo_to_mcsv2}
 \usage{
-solo_to_lilypond(solo_tbl, tempo = 120, ...)
+solo_to_lilypond(solo_tbl, file = "solo.pdf", key = "c", tempo = 120, ...)
 }
 \arguments{
 \item{solo_tbl}{(data frame) generated phrases in data.frame}
