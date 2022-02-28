@@ -3,6 +3,7 @@
 printf <- function(...) print(sprintf(...))
 messagef <- function(...) if(parkR::parkr_options()$debug) message(sprintf(...))
 
+#' @export
 value_to_vec <- function(value_str){
   vec <- gsub("\\[", "", as.character(value_str))
   vec <- gsub("\\]", "", vec)
@@ -29,6 +30,7 @@ value_to_vec <- function(value_str){
 #                 "Down"="-",
 #                 "Oblique" = "")
 
+#' @export
 int_span <- function(start, end){
   mapply(function(x, y){seq(x, y, 1)}, start, end) %>%
     unlist() %>%
@@ -37,6 +39,7 @@ int_span <- function(start, end){
     sort()
 }
 
+#' @export
 vec_to_value <- function(int_vec){
   sprintf("[%s]", paste(int_vec, collapse=","))
 }
@@ -567,6 +570,22 @@ cut_row <- function(data, row_index, type=c("left", "right")){
 
 get_two_rows <- function(data, row_index){
   data[row_index:(row_index + 1),]
+}
+
+get_row_context <- function(data, row_index, before = 0, after = before){
+
+  if(length(before) == 1){
+    before <- rep(before, length(row_index))
+  }
+  if(length(after) == 1){
+    after <- rep(after, length(row_index))
+  }
+  if(length(before) != length(after)){
+    stop( "Length of after and before do not match")
+  }
+  lower <- pmax(1, row_index - before)
+  upper <- pmin(nrow(data), row_index + after)
+  data[map2(lower, upper, ~{seq(.x,.y)}) %>% unlist() %>% sort(),]
 }
 
 show_overlaps <- function(data, thresh = 0, type = NULL, complete_idx = F){

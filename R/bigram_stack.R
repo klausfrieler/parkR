@@ -10,6 +10,7 @@ bigram_encoder <- function(x, level = 1, sep = ""){
                 bigram = sprintf("%s,%s", x, y),
                 bi_enc = as.integer(factor(bigram)) - 1,#zero based
                 level = level) %>%
+    #filter(!is.na(y)) %>%
     group_by(bi_enc) %>%
     mutate(n_xy = n()) %>%
     ungroup() %>%

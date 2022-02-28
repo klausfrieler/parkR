@@ -596,7 +596,7 @@ create_leadsheet <- function(name, chords, length_beats){
 simulate_wjd <- function(ids = 1:456){
   wjd_meta <- parkR::wjd_meta %>% mutate(compid = as.integer(factor(id)))
   ids <- as.integer(ids)
-  ids <- ids[ids >= 1 ] & ids[ids <= 456 ]
+  ids <- ids[ids >= 1  & ids <= 456 ]
   map_dfr(ids, function(cid) {
     #messagef("Generating %d...", cid)
     sheet <- create_leadsheet_from_wjd_db(compid = cid)
@@ -710,7 +710,12 @@ create_sheet_from_wjd_changes <- function(changes, form_parts = NULL){
 
 #' export
 get_random_chord <- function(chord_db = parkR::irb){
-  sprintf("%s%s", sample(chord_db$root, 1), sample(chord_db$type, 1))
+  if("root" %in% names(chord_db)){
+    sprintf("%s%s", sample(chord_db$root, size = 1), sample(chord_db$type, size = 1))
+  }
+  else{
+    sample(chord_db$chord, 1)
+  }
 }
 
 expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL, with_key_analysis = T){
