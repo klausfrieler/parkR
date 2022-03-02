@@ -190,7 +190,9 @@ realize_wb_atom <- function(type,
 }
 
 get_current_chord <- function(chord_sequence, start_ticks){
+  #browser()
   current_chord <- chord_sequence[chord_sequence$onset_ticks <= start_ticks, ]
+  messagef("Start ticks: %d, chord = %s", start_ticks, current_chord[nrow(current_chord),]$chord)
   current_chord[nrow(current_chord),]
 }
 
@@ -326,7 +328,7 @@ generate_phrase_over_chords <- function(lead_sheet,
       #printf("Loop...%d", j)
       j <- j +1
       if(j > 100){
-        stop("Infinite loop in generate")
+        stop("Infinite loop generated")
       }
       candidate <- parkR::successor_dist %>%
         filter(type == last$type,
@@ -365,15 +367,18 @@ generate_phrase_over_chords <- function(lead_sheet,
     pitches <- pitches[1:(length(pitches) - 1)]
     #pretty_print_pitches(pitches)
     tmp <- get_iois_and_mpos(pitches, current_ticks, mlu = mlu)
-    current_ticks <- max(tmp$mpos) + last_n(tmp$iois, 1)
+
     #printf("Current ticks: %d, max mpos %d, last : %d", current_ticks, max(tmp$mpos), last_n(tmp$iois, 1))
     current_chord <- get_current_chord(lead_sheet, current_ticks)
+    current_ticks <- max(tmp$mpos) + last_n(tmp$iois, 1)
+
     ret[[i]] <- tibble(pitch = pitches,
                        mpos = tmp$mpos,
                        iois = tmp$iois,
                        type = row$type,
                        chord = current_chord$chord)
-  }
+  }#
+  assign(sprintf("ret_%d", start_ticks), ret, globalenv())
   bind_rows(ret) %>% mutate(mlu = mlu)
 }
 
