@@ -125,6 +125,26 @@ triad_types <- c("min", "maj", "min", "min", "min", "min", "maj", "o", "o", "o",
 names(triad_types) <- chord_types
 
 
+cdpcx_map <- list()
+cdpcx_map[["maj"]] <- c("1", "-", "2", "B", "3", "4", "T", "5", "%", "6", "<", "7")
+cdpcx_map[["min"]] <- c("1", "-", "2", "3", ">", "4", "T", "5", "%", "6", "7", "L")
+cdpcx_map[["dim"]] <- c("1", "-", "2", "3", ">", "4", "T", "5", "%", "6", "7", "L")
+cdpcx_map[["dom"]] <- c("1", "-", "2", "B", "3", "4", "T", "5", "%", "6", "7", "L")
+cdpcx_levels <- c("1", "2",  "3", "4",  "5", "6", "7", "-", "B", "%", "T",  ">", "<", "L")
+chord_type_map <- c("minmaj7" = "min",
+                    "maj7" = "maj",
+                    "min7" = "min",
+                    "min6" = "min",
+                    "minb6" = "min",
+                    "min" = "min",
+                    "maj" = "maj",
+                    "m7b5" = "min",
+                    "o7" = "dim",
+                    "o" = "dim",
+                    "7" = "dom",
+                    "6" = "maj")
+
+
 get_chord_scale_summary <-function(){
   purrr::map_dfr(names(chord_definitions), function(n){
     entry <- chord_definitions[[n]]
@@ -137,6 +157,7 @@ get_chord_scale_summary <-function(){
            scale_desc = scale_desc)
   })
 }
+
 get_extensions <- function(chord_label){
   ret <- c()
   restore_m7b5 <- FALSE
@@ -278,9 +299,55 @@ parse_chord <- function(chord_label){
   pc <- tone_name_to_pc(chord_label)
   bass_pc <- tone_name_to_pc(bass)
 
-  return(tibble(root=chord_label, type=type, pc = pc, bass = bass, bass_pc = bass_pc, ext = ext))
+  return(tibble(root = chord_label, type = type, pc = pc, root_pc = pc, bass = bass, bass_pc = bass_pc, ext = ext))
+}
+#' fast_parse_chord
+#'
+#' This function parses a chord label into its constituents as parse_chord, but optimized for speed for long vectors of chord labels
+#'
+#' @param chord_label (character vector) chord labels to parse
+#' @return data frame with columns \code{root} (tone name), \code{type} (basic chord type), \code{pc} (pitch class of root),
+#' \code{bass} (extra bass note by slash chord), \code{bass_pc} (pitch class of ),
+#' \code{ext} (string of comma separated extensions)
+#' @export
+fast_parse_chord <- function(chord_label){
+  chords <- unique(chord_label)
+  parsed_chords <- parse_chord(chords) %>% mutate(chord = chords)
+  tibble(chord = chord_label) %>% left_join(parsed_chords, by = "chord") %>% select(-chord)
 }
 
+#' get_cdpcx
+#'
+#' This function transforms a set of (MIDI) pitches given a list of chords into the corresponding Extended Chordal Diatonic Pitch Classes (CDPCX)
+#'
+#' @param pitches (integer vector) pitches to transform
+#' @param chord (character vector or tibble of parsed chords) chords to be used for calculating CDPCX classes, length must either match or it must be a single chord label
+#' @return character vector of CDPCX values. (1-7 diatonic steps, - = b9, % = b13, B = #9 blues third, T = tritone (#11), > major third over minor chord, < = minor seventh over major 7th chord, L = major seventh over chord with minor seventh
+#' @export
+get_cdpcx <- function(pitches, chord){
+  #print(chord)
+  if(length(chord) == 1){
+    chord <- rep(chord, length(pitches))
+  }
+  else{
+    if(length(chord) != length(pitches)){
+      stop("Length of chords should be one or match length of pitches")
+      }
+  }
+  if(all(is.character(chord))){
+    chord <- fast_parse_chord(chord)
+  }
+
+  cpc <- (pitches - chord$pc) %% 12
+  diatonic_type <- chord_type_map[chord$type]
+  cpc[is.na(cpc)] <- 12
+
+  cdpcx <- map2_chr(diatonic_type, cpc, ~{
+    c(cdpcx_map[[.x]], NA)[.y + 1]
+    })
+  cdpcx
+
+}
 spread_pitches <- function(pc_set, root, min_pitch = 48, max_pitch = 84){
   tmp <- purrr::map(12*(-5:6), function(x) sort(root + x + pc_set)) %>% unlist
   tmp[tmp >= min_pitch & tmp <= max_pitch]
@@ -455,19 +522,6 @@ find_best_matching_scale <- function(pitch_set, root = pitch_set[1]){
        rel_match = as.numeric(best[1]/length(unique(pitch_set)))
   )
 }
-#Fblues <- tribble(~ chords, ~length_beats,
-#                 "F7", 4,
-#                 "Bb7", 4
-#                 )
-blues <- tibble(chord = c("F7","Bb7", "F7",  "Cmin7", "F7", "Bb7", "Bb7", "F7", "F7", "Gmin7", "C7", "F7", "F7"),
-                length_beats = as.integer(c(4, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4)))
-blues <- blues %>% mutate(length_ticks = length_beats*4) %>%
-                          mutate(parsed = purrr::map(chord, parse_chord)) %>%
-  tidyr::unnest(cols = parsed)
-blues$onset_ticks <- cumsum(blues$length_ticks)
-blues$onset_ticks <- blues$onset_ticks - blues$onset_ticks[1]
-blues$beat <- (floor(blues$onset_ticks/4) %%4 ) + 1
-blues$bar <- floor(blues$onset_ticks/16) + 1
 
 unroll_durations <- function(durations){
   tmp <- cumsum(durations)
