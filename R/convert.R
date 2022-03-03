@@ -187,7 +187,7 @@ get_tabr_note <- Vectorize(function(midi_pitch){
   if(midi_pitch < 0 ){
     return("r")
   }
-  pc_labels <- parkR::pc_labels_flat %>% str_replace("b", "_") %>% tolower()
+  pc_labels <- pc_labels_flat %>% str_replace("b", "_") %>% tolower()
   note_name <- pc_labels[midi_pitch %%12 + 1]
   oct <- get_octave_str(midi_pitch)
   sprintf("%s%s", note_name, oct)
