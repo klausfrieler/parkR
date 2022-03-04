@@ -378,7 +378,7 @@ generate_phrase_over_chords <- function(lead_sheet,
                        type = row$type,
                        chord = current_chord$chord)
   }#
-  assign(sprintf("ret_%d", start_ticks), ret, globalenv())
+  #assign(sprintf("ret_%d", start_ticks), ret, globalenv())
   bind_rows(ret) %>% mutate(mlu = mlu)
 }
 
@@ -437,7 +437,9 @@ generate_solo <- function(lead_sheet,
     #printf("Current ticks %d (max %d, chorus %d), current chorus: %d", current_ticks, max_ticks, max_chorus_ticks, current_chorus_id)
     phrase_id <- phrase_id + 1
   }
-  bind_rows(ret) %>% set_format("solo_df") %>% filter(mpos <= max_ticks) %>% rename(ioi = iois)
+  solo <- bind_rows(ret) %>% set_format("solo_df") %>% filter(mpos <= max_ticks) %>% rename(ioi = iois)
+  attr(solo, "lead_sheet") <- lead_sheet
+  solo
 }
 
 #' make_many_solos
