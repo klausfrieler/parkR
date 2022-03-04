@@ -316,6 +316,19 @@ fast_parse_chord <- function(chord_label){
   tibble(chord = chord_label) %>% left_join(parsed_chords, by = "chord") %>% select(-chord)
 }
 
+chord_to_lilypond <- function(chord_labels, lengths = NULL){
+
+  chord <- fast_parse_chord(chord_labels)
+  roots <- str_replace_all(chord$root, "b", "es") %>%  str_replace_all("#", "is") %>% tolower() %>% str_replace("ees", "es")
+  if(is.null(lengths)){
+    chords <- sprintf("%s:%s", roots,  chord$type)
+
+  }
+  else {
+    chords <- sprintf("%s%d:%s", roots, as.integer(floor(lengths)), chord$type)
+  }
+  chords
+}
 #' get_cdpcx
 #'
 #' This function transforms a set of (MIDI) pitches given a list of chords into the corresponding Extended Chordal Diatonic Pitch Classes (CDPCX)
@@ -613,8 +626,9 @@ create_leadsheet_from_irb <- function(compid, name = NULL, with_form = F){
 #' @export
 create_leadsheet_from_wjd_db <- function(compid, name = NULL, with_form = F){
   db <- parkR::wjd_chord_db %>%
-    rename(chord = original) %>%
-    left_join(parkR::wjd_meta %>% select(title, id, time = signature), by = "id")
+    rename(chord = original, section = form_name) %>%
+    left_join(parkR::wjd_meta %>%
+                select(title, id, composer, date = recordingyear, key, time = signature), by = "id")
   create_leadsheet_from_chord_db(db, compid, name, with_form)
 }
 

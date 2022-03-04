@@ -4,11 +4,27 @@ printf <- function(...) print(sprintf(...))
 messagef <- function(...) if(parkR::parkr_options()$debug) message(sprintf(...))
 
 #' @export
-value_to_vec <- function(value_str){
+value_to_vec <- function(value_str, type = c("integer", "character"), collapse = ""){
+  type <- match.arg(type)
   vec <- gsub("\\[", "", as.character(value_str))
   vec <- gsub("\\]", "", vec)
+  vec <- gsub("[\\{\\(]+", "", vec)
+  vec <- gsub("[\\}\\)]+", "", vec)
   vec <- gsub(" ", "", vec)
-  as.integer(unlist(strsplit(vec, ",")))
+  if(type == "integer"){
+    as.integer(unlist(strsplit(vec, ",")))
+    ret <- map(strsplit(vec, ","), ~{as.integer(.x)})
+    if(length(value_str) == 1){
+      ret <- ret[[1]]
+    }
+  }
+  else {
+    ret <- strsplit(vec, ",")
+    if(!is.null(collapse) & !nzchar(collapse)){
+      ret <- map(ret, ~{paste(.x, collapse = collapse)}) %>% unlist()
+    }
+  }
+  ret
 }
 
 # column_to_vector <- function(tbf, col_name) tbf[[col_name]]

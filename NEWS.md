@@ -1,3 +1,9 @@
+# parkR 0.4.0
+
+* Added export for generated solso to PDF/Lilypond and MIDI via the tabr package
+* Fixed lot of bugs
+* Added some useful export functions
+
 # parkR 0.3.0
 
 * Renamed create_from_irb and create_from wjd_db

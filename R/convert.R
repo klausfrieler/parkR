@@ -76,7 +76,7 @@ solo_to_mcsv2 <- function(solo_tbl, tempo = 120){
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.
 #' @return A solo data frame in MCSV2 format
 #' @export
-solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120, ...){
+solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120, lead_sheet = NULL, ...){
   tmp <- solo_tbl %>%
     select(-c(type, mlu, phrase_id, chorus_id, chord)) %>%
     mutate(
@@ -87,8 +87,18 @@ solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120
            true_ioi = c(diff(mpos), NA),
            end_beat = floor(end_pos / ticks_per_beat) ,
            over_beat = beat != end_beat)
+  #browser()
+
   if(tmp[1,]$beat_pos != 0){
-    patch_row <- tmp[1,] %>% mutate(pitch = -1, ioi = mpos, mpos = 0, overbeat = F)
+    patch_row <- tmp[1,] %>% mutate(pitch = -1,
+                                    ioi = mpos,
+                                    mpos = 0,
+                                    bar = 0,
+                                    beat = 0, beat_pos = 0,
+                                    end_pos = ioi,
+                                    true_ioi = 5,
+                                    end_beat = floor(ioi / ticks_per_beat),
+                                    over_beat = ioi > 4)
     tmp <- bind_rows(patch_row, tmp)
   }
   #browser()
@@ -99,11 +109,17 @@ solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120
   tmp <- tmp %>%
     filter(ioi != true_ioi, mpos != 0) %>%
     mutate(pitch = -1,
+           mpos = mpos + ioi,
            ioi = true_ioi - ioi,
-           beat_pos = (beat_pos + ioi) %% ticks_per_beat) %>%
+           true_ioi = ioi,
+           bar = floor(mpos / ticks_per_bar),
+           beat = floor(mpos / ticks_per_beat) ,
+           beat_pos = mpos %% ticks_per_beat,
+           end_pos = mpos + ioi - 1,
+           end_beat = floor(end_pos / ticks_per_beat) ,
+           over_beat = beat != end_beat) %>%
     mutate(tabr_dur = ioi_to_tabr_dur(ioi)) %>%
     bind_rows(tmp)
-
   good_iois <- tmp %>% filter(tabr_dur != "split", !over_beat)
   bad_iois <- tmp %>% filter(tabr_dur == "split" | over_beat)
 
@@ -127,11 +143,19 @@ solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120
     browser()
   }
   notes <- sprintf("%s%s", get_tabr_note(tmp$pitch), tmp$tilde)
-
+  chord_seq <- NULL
+  attached_lead_sheet <- attr(solo_tbl, "lead_sheet")
+  if(!is.null(attached_lead_sheet)){
+    chord_seq <- setNames(4/attached_lead_sheet$duration, chord_to_lilypond(attached_lead_sheet$chord))
+  }
+  if(!is.null(lead_sheet)){
+    chord_seq <- setNames(4/lead_sheet$duration, chord_to_lilypond(lead_sheet$chord))
+  }
+  browser()
   tabr::as_music(notes = notes, info = tmp$tabr_dur) %>%
     p() %>%
     track(tab = F) %>%
-    score()  %>%
+    score(chord_seq = chord_seq)  %>%
     tab(file = file, key = key, time = "4/4", tempo = sprintf("4 = %s", tempo))
 }
 
