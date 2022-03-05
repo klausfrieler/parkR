@@ -1,5 +1,20 @@
 g_counter <- 0
 
+instrument_ranges <- tribble(~instrument,~min,~max,~q05,~q95, ~low, ~high,
+"as", 42, 87, 57, 75, 50, 82,
+"bcl", 37, 80, 46, 74, 37, 80,
+"bs", 38, 69, 48, 65, 43, 69,
+"cl", 49, 91, 56, 83, 51, 91,
+"cor", 54, 90, 62, 80, 55, 87,
+"g", 43, 83, 52, 74, 45, 80,
+"p", 36, 91, 50, 77, 42, 85,
+"ss", 55, 95, 61, 83, 55, 91,
+"tb", 43, 80, 53, 70, 48, 75,
+"tp", 51, 97, 61, 81, 54, 86,
+"ts", 41, 91, 52, 73, 46, 81,
+"ts-c", 44, 78, 50, 71, 44, 78,
+"vib", 53, 89, 61, 83, 53, 89)
+
 sample_iois <- function(size = 10, start = 1){
 
   last <- start - 3
@@ -16,10 +31,6 @@ sample_iois <- function(size = 10, start = 1){
   }
   ret + 3
 }
-
-
-
-
 
 realize_arpeggio <- function(direction,length, start_pitch, chord, pitch_range = c(48, 84)){
   direction <- sign(direction)
@@ -396,7 +407,7 @@ generate_phrase_over_chords <- function(lead_sheet,
 #' @export
 generate_solo <- function(lead_sheet,
                           n_chorus = 1,
-                          pitch_range = c(48, 84),
+                          pitch_range = c(50, 83),
                           tempo = 120,
                           lick_to_line_ratio = .5,
                           excludes = NULL){
