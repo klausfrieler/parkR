@@ -76,6 +76,13 @@ NULL
 #' @docType data
 NULL
 
+#' instrument_ranges
+#'
+#' Tibble of instrument ranges, extracted from the Weimar Jazz Databse, min(imum), max(imum),  5% (q5) and 95% (q95) percentiles
+#' @name instrument_ranges
+#' @docType data
+NULL
+
 
 #' wjd_transforms
 #'
