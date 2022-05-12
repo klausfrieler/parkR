@@ -7,7 +7,7 @@
 generate_solo(
   lead_sheet,
   n_chorus = 1,
-  pitch_range = c(48, 84),
+  pitch_range = c(50, 83),
   tempo = 120,
   lick_to_line_ratio = 0.5,
   excludes = NULL

@@ -133,3 +133,10 @@ NULL
 #' @name esac_meta
 #' @docType data
 NULL
+
+#' labels
+#'
+#' List of various useful music related labels
+#' @name labels
+#' @docType data
+NULL

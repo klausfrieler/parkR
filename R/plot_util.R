@@ -1,23 +1,93 @@
-#library(cowplot)
-#out_dir <- "../figs/new/"
-#fig_dir <- "e:/projects/science/jazzomat/docs/conferences/JazzforschungD2018/paper/figs/"
 img_format <- "png"
-default_text_size<-12
+default_text_size <- 12
 default_color <- "darkslategrey"
 
-#default_color  <-"lightblue4"
+default_color1  <-"lightblue4"
 default_color2 <-"lightblue3"
 default_color3 <-"lightblue2"
 default_color4 <-"lightblue1"
 jazzomat_red <- "indianred3"
-#default_color3 <-"lightgoldenrod4"
-#default_color4 <-"aquamarine4"
-jazzomat_pallette = c(default_color, default_color2, default_color3, default_color4)
-jazzomat_pallette2 = c(default_color, default_color2, default_color2, default_color)
-jazzomat_pallette3 = c(default_color,jazzomat_red, default_color2, default_color)
+jazzomat_gold <-"lightgoldenrod4"
+jazzomat_blue <-"aquamarine4"
+
+jazzomat_palette  <- list(
+  set1 = c(default_color, default_color2, default_color3, default_color4),
+  set2 = c(default_color, default_color2, default_color2, default_color),
+  set3 = c(default_color,jazzomat_red, default_color2, default_color)
+)
 
 default_grid_color <- "gray64"
+
 basic_theme <- "minimal"
+
+labels <- list(
+  cpc_labels = c("1", "b9", "9", "b3", "3", "11", "#11/b5", "5", "b13", "13", "7", "j7", "NA"),
+  durclass_labels = c("Very Short", "Short", "Medium", "Long", "Very Long"),
+  fuzzy_labels = c("Large Jump Down", "Jump Down","Leap Down","Step Down","Repetition","Step Up","Leap Up","Jump Up","Large Jump Up"),
+  pc_labels = c("C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "Bb", "B"),
+  pc_labels_sharp = c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"),
+  pc_labels_flat = c("C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"),
+  metric_pos_4_4 = c("1", "", "", "", "", "", "1+", "", "", "", "", "", "2", "", "", "", "", "", "2+", "", "", "", "", "",  "3", "", "", "", "", "", "3+", "", "", "", "", "", "4", "", "", "", "", "","4+", "", "", "", "", "" ),
+  main_idea = c("rhythm","lick","lick","line","melody","lick","lick","rhythm","line","line","line","line","line","line","line","line","line","line","rhythm","line","line","melody","line","line","line","melody","line","fragment","line","line","expressive","melody","expressive","line","line","lick","rhythm","rhythm","line","line","line","rhythm","rhythm","rhythm","rhythm","line","line","expressive","line","line","line","expressive","expressive","melody","line","expressive"),
+  sub_ideas = c("rhythm-single-irregular","lick","lick","line-wavy-ascending","melody","lick","lick","rhythm-single-irregular","line-wavy-descending","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-descending","line-wavy-descending","line-tick-slide","rhythm-single-irregular","line-descending","line-wavy-ascending","melody","line-wavy-descending","line-wavy-ascending","line-wavy-concave","melody","line-wavy-convex","fragment","line-wavy-horizontal","line-wavy-ascending","expressive","melody","expressive","line-wavy-descending","line-ascending","lick","rhythm-multi-regular","rhythm-multi-regular","line-wavy-ascending","line-descending","line-wavy-descending","rhythm-multi-regular","rhythm-multi-regular","rhythm-multi-regular","rhythm-multi-regular","line-wavy-descending","line-wavy-ascending","expressive","line-wavy-horizontal","line-wavy-descending","line-wavy-ascending","expressive","expressive","melody","line-wavy-horizontal","expressive"),
+  parsons_labels = c("Down", "Repeat", "Up"),
+  cdpc_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10"),
+  cdpcx_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10", "b9", "b13"),
+  contour_labels =  c("Ascending", "Ascending-Horizontal", "Concave", "Convex", "Descending", "Descending-Horizontal", "Horizontal", "Horizontal-Ascending", "Horizontal-Descending"),
+  redcontour_labels =  c("Ascending", "Descending",  "Convex", "Concave",  "Horizontal")
+
+)
+
+make_octave <- function(n){
+  c(sprintf("C%s", as.character(n)), rep("", 11))
+}
+
+MIDI_labels <- NULL
+MIDI_reduced_labels <- NULL
+for (i in -1:10){
+  MIDI_labels <- c(MIDI_labels, make_octave(i))
+  MIDI_reduced_labels <- c(MIDI_reduced_labels, make_octave(i))
+}
+MIDI_labels[8 + 0:11 * 12] <- paste("G", -1:10, sep="")
+MIDI_labels[3 + 0:11 * 12] <- paste("D", -1:10, sep="")
+MIDI_labels[5 + 0:11 * 12] <- paste("E", -1:10, sep="")
+MIDI_labels[6 + 0:11 * 12] <- paste("F", -1:10, sep="")
+MIDI_labels[10 + 0:11 * 12] <- paste("A", -1:10, sep="")
+MIDI_labels[12 + 0:11 * 12] <- paste("B", -1:10, sep="")
+
+MIDI_full <- MIDI_labels
+MIDI_full[9 + 0:11*12] <- paste("Ab", -1:10, sep="")
+MIDI_full[2 + 0:11*12] <- paste("Db", -1:10, sep="")
+MIDI_full[4 + 0:11*12] <- paste("Eb", -1:10, sep="")
+MIDI_full[7 + 0:11*12] <- paste("Gb", -1:10, sep="")
+MIDI_full[11 + 0:11*12] <- paste("Bb", -1:10, sep="")
+#MIDI_full[12 + 0:11*12]<-paste("B", -1:10, sep="")
+
+MIDI_reduced_labels[8 + 0:11*12] <- paste("G", -1:10, sep="")
+MIDI_full <- MIDI_full[2:length(MIDI_full)]
+MIDI_reduced_labels <- MIDI_reduced_labels[2:length(MIDI_reduced_labels)]
+
+# names(MIDI_labels) <- (1:length(MIDI_labels))
+# names(MIDI_reduced_labels) <- (1:length(MIDI_reduced_labels))
+labels[["MIDI_note_names"]] <- MIDI_full
+labels[["MIDI_note_names_reduced"]] <- MIDI_reduced_labels
+
+usethis::use_data(labels, overwrite = T)
+
+#' nice_cdpcx
+#' Makes a nice (sorted, labeled) cdpcx factor
+#' @param cdpcx_factor
+#'
+#' @return factor of vector
+#' @export
+nice_cdpcx <- function(cdpcx_factor){
+  #Order and re-label raw CDPCX values for display
+  cdpcx_factor <- factor(cdpcx_factor,
+                         levels = c("1", "2", "3", "4", "5", "6", "7", "B", "L", "T", "<", ">", "-", "%"),
+                         labels = labels$cdpcx_labels
+                         )
+  return(cdpcx_factor)
+}
 
 get_default_theme <- function(x_rotate = 0, keep_legend = F){
   if (basic_theme == "tufte"){
@@ -109,7 +179,7 @@ piano_roll <- function(solo, by_chorus = T){
 }
 #' cpc_plot_solo
 #'
-#' This function produces a barplot of CPC values from a solo (MCSV2) data frame
+#' This function produces a bar plot of CPC values from a solo (MCSV2) data frame
 #'
 #' @param solo (solo data frame) MCSV2 formatted solo data.frame
 #' @param by_chord (logical scalar) Flag to add chord facets
@@ -174,4 +244,198 @@ phrase_over_form2 <- function(solo, beats, bar_unit = 4, size = 1, width=.5){
   q  <- q + scale_fill_grey()
   q  <- q + facet_wrap(~chorus_id, ncol = 1, scales = "free_x")
   return(q)
+}
+
+add_geom_bar <- function(q, percentage = T, fill_var = NULL, palette = jazzomat_palette[["set1"]]){
+  if (percentage){
+    if (is.null(fill_var)){
+      q <- q + geom_bar(aes(y = ..count../tapply(..count..,..PANEL..,sum)[..PANEL..]),
+                        fill = palette[[1]],
+                        position = position_dodge())
+      q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
+    }
+    else{
+      q <- q + geom_bar(aes_string(y = "..count../tapply(..count..,..PANEL..,sum)[..PANEL..]",
+                                   fill = fill_var),
+                        position = position_dodge())
+      q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
+      q <- q + scale_fill_manual(values = palette, name = "")
+    }
+  }
+  else{
+    if (is.null(fill_var)){
+      q <- q + geom_bar(fill = palette[[1]],
+                        position = position_dodge())
+    }
+    else{
+      q <- q + geom_bar(aes_string(fill = fill_var),
+                        position = position_dodge())
+      q <- q + scale_fill_manual(values = palette[[1]], name = "")
+    }
+  }
+  q
+
+}
+add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, colour = "black", palette = jazzomat_palette[["set1"]]){
+  if (percentage){
+    if (is.null(fill_var)){
+      q <- q + geom_histogram(aes(y = ..count../tapply(..count.., ..PANEL..,sum)[..PANEL..]),
+                              fill = palette[[1]],
+                              colour = colour,
+                              binwidth = binwidth,
+                              position = position_dodge())
+      q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
+    }
+    else{
+      q <- q + geom_histogram(aes_string(y = "..count../tapply(..count..,..PANEL..,sum)[..PANEL..]",
+                                         fill = fill_var),
+                              colour = colour,
+                              binwidth = binwidth,
+                              position = position_dodge())
+      q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
+      q <- q + scale_fill_manual(values = palette, name = "")
+    }
+  }
+  else{
+    if (is.null(fill_var)){
+      q <- q + geom_histogram(fill = palette[[1]],
+                              colour = colour,
+                              binwidth = binwidth,
+                              position = position_dodge())
+    }
+    else{
+      q <- q + geom_histogram(aes_string(fill = fill_var),
+                              colour = colour,
+                              binwidth = binwidth,
+                              position = position_dodge())
+      q <- q + scale_fill_manual(values = palette, name = "")
+    }
+  }
+  q
+}
+
+#' get_cdpcx_hist
+#' Plots a fancy cdpcx (extended chordal diatonic pitch class plot"
+#' @param data (data frame) most contain cdpcx_col as variable with cdpcx data
+#' @param id (string or integer) Optional set of ids to filter
+#' @param colour_chromatic (boolean) Flag whether to colour chromatic pitch classes differently
+#' @param percentage (boolen) Flag whether to use percentage scale on y-axis
+#' @param fill_var (String) extra fill variable
+#' @param cdpcx_col (string) column name where cdpcx data is stored, default cdpcx_raw_all
+#'
+#' @return A ggplot2 object
+#' @export
+#'
+#' @examples
+cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fill_var = NULL, cdpcx_col = "cdpcx_raw_all"){
+  tmp <- select_by_id(data, id)
+  tmp <- tmp[tmp[[cdpcx_col]] != "X",]
+  if (nrow(tmp) == 0){
+    return(NULL)
+    # tmp <- select_by_id(data, id)
+    # tmp$nice_cdpcx <- nice_cdpcx(tmp[[cdpcx_col]])
+    # colour_chromatic <- F
+    # fill_var <- NULL
+  }
+  else{
+    tmp$nice_cdpcx <- nice_cdpcx(tmp[[cdpcx_col]])
+    tmp$chromatic <- factor(as.numeric(tmp$nice_cdpcx) > 7, labels = c("Diatonic", "Chromatic"))
+    tmp$chromatic2 <- factor(paste(tmp[, fill_var], as.character(tmp$chromatic), sep = " - "))
+  }
+  q <- ggplot(tmp, aes(x = nice_cdpcx))
+  if (colour_chromatic){
+    if (is.null(fill_var)){
+      q <- add_geom_bar(q, percentage, fill_var = "chromatic")
+    }
+    else{
+      q <- add_geom_bar(q, percentage, fill_var = "chromatic2", palette = jazzomat_palette[["set2"]])
+    }
+  }
+  else{
+    q <- add_geom_bar(q, percentage, fill_var)
+  }
+  q <- q + get_default_theme() + theme(legend.position = "none")
+  q <- q + scale_x_discrete(name = "Extended chordal diatonic pitch class",
+                            labels = labels[["cdpcx_labels"]],
+                            drop = FALSE)
+  return (q)
+}
+
+#' pc_hist
+#'
+#' Plots a fancy pitch class plot
+#' @param data (data frame) must contain "pc_col" as variable with pitch class data
+#' @param id (string or integer) Optional set of ids to filter
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param fill_var (string) extra fill variable
+#' @param pc_col (string) column name where pitch class data is stored, defaults to "pc_raw"
+#'
+#' @return A ggplot2 object
+#' @export
+#'
+#' @examples
+pc_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, pc_col = "pc_raw"){
+  tmp <- select_by_id(data, id)
+  q <- ggplot(tmp, aes(x = factor(!!sym(pc_col), levels = 0:11)))
+  q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
+  q <- q + get_default_theme() + theme(legend.position = "none")
+  q <- q + scale_x_discrete(name = "Pitch Class", drop = FALSE, labels = labels[["pc_labels"]])
+  q
+}
+
+#' pitch_hist
+#'
+#' Plots a fancy pitch  plot
+#' @param data (data frame) must contain "pitch_col" as variable with (MIDI) pitch  data
+#' @param id (string or integer) Optional set of ids to filter
+#' @param reduced_labels (boolean) Flag, whether to use reduced pitch labels
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param fill_var (string) extra fill variable
+#' @param pitch_col (string) column name where pitch  data is stored, defaults to "pitch_raw"
+
+#' @return A ggplot2 object
+#' @export
+#'
+#' @examples
+pitch_hist <- function(data, id = NULL, reduced_labels = F, percentage = T, fill_var = NULL, pitch_col = "pitch_raw"){
+  tmp <- select_by_id(data, id)
+  min_p <- min(tmp[[pitch_col]])
+  max_p <- max(tmp[[pitch_col]])
+  q <- ggplot(tmp, aes(x = factor(!!sym(pitch_col), levels = min_p:max_p)))
+  q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
+  q <- q + get_default_theme() + theme(legend.position = "none")
+  if(reduced_labels){
+    q <- q + scale_x_discrete(name = "Pitch", drop = FALSE, labels = labels[["MIDI_note_names_reduced"]][min_p:max_p])
+  }
+  else{
+    q <- q + scale_x_discrete(name = "Pitch", drop = FALSE, labels = labels[["MIDI_note_names"]][min_p:max_p])
+
+  }
+  q
+}
+
+#' mcm_hist
+#'
+#' Plots a fancy Metrical Circle Map (N = 48)  plot
+#' @param data (data frame) Must contain "mcm48_col" as column with MCM data
+#' @param id (string or integer) Optional set of ids to filter
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param fill_var (string) extra fill variable
+#' @param mcm48_col (string) column name where MCM 48 data is stored, defaults to "mcm_48"
+#' @param x_labels (string vector) Labels for x axis, defaults to 4/4 labels
+#'
+#' @return
+#' @export
+#'
+#' @examples
+mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col = "mcm_48", x_labels = labels[["metric_pos_4_4"]]){
+  tmp <- select_by_id(data, id)
+  #tmp$full_beats <- factor(tmp$mcm_48 %% 12 == 0, labels=c("Offbeat", "Beat"))
+  q <- ggplot(tmp, aes(x = factor(!!sym(mcm48_col), levels = c(0:47))))
+  q <- q + scale_color_manual(values = c("white", "black"))
+  q <- q +  get_default_theme() + theme(legend.position="none")
+  q <- add_geom_bar(q, percentage, fill_var)
+  q <- q +  scale_x_discrete(name = "Metrical Circle Map (N = 48)", drop = FALSE, labels = x_labels)
+  return(q)
+
 }

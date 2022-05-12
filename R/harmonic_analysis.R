@@ -3,14 +3,26 @@ convert_scale_degree <- function(roman_number){
   map(scale_degrees[["nomr"]])
 }
 
+
 scale_degrees <- list("norm" = c("I", "IIb", "II","IIIb", "III", "IV","IV#", "V", "VIb", "VI", "VIIb", "VII"),
                       "maj" = c("I", "IIb", "ii", "iii", "IV", "IV#", "V", "VIb", "vi", "VIIb", "viio"),
                       "min" = c("i", "IIb", "iio", "IIIb", "iv", "IV#", "V", "VIb", "vio", "VIIb", "viio"))
+usethis::use_data(scale_degrees, overwrite = TRUE)
 
 get_triad_type <- function(chord_type){
   triad_types[chord_type]
 }
 
+#' get_scale_degree_code
+#'
+#' @param chord_label (string) Valid chord symbol
+#' @param key (string) valid key symbol
+#' @param as_df (boolean) flag whether to return a data.frame or string vector
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get_scale_degree_code <- function(chord_label, key, as_df = FALSE){
     #browser()
   if(length(chord_label) > 1){

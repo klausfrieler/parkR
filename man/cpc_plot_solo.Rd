@@ -12,5 +12,5 @@ cpc_plot_solo(solo, by_chord = T)
 \item{by_chord}{(logical scalar) Flag to add chord facets}
 }
 \description{
-This function produces a barplot of CPC values from a solo (MCSV2) data frame
+This function produces a bar plot of CPC values from a solo (MCSV2) data frame
 }

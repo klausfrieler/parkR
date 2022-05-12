@@ -361,6 +361,7 @@ get_cdpcx <- function(pitches, chord){
   cdpcx
 
 }
+
 spread_pitches <- function(pc_set, root, min_pitch = 48, max_pitch = 84){
   tmp <- purrr::map(12*(-5:6), function(x) sort(root + x + pc_set)) %>% unlist
   tmp[tmp >= min_pitch & tmp <= max_pitch]

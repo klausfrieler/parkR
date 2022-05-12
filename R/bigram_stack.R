@@ -235,7 +235,7 @@ get_all_subgrams <- function(bigram_stack, bi_enc, level, mode = "all"){
   })
 }
 
-
+#' @export
 ngram_analysis <- function(x, max_level = Inf, with_overlap = T, min_level = 2, min_n = 2, min_DF = 1, excess_n = 1, ids = NULL){
   #if(is.null(ids)){
   #  if("id" %in% names(x) && is.dataframe(x)){
@@ -429,3 +429,188 @@ get_coverage_by_set <- function(bigram_stack, bigram_set){
     length()
   tibble(coverage = covered/total_pos, over_coverage = covered/over_covered)
 }
+
+#' @export
+pull_unique <- function(data, var){
+  data %>% pull({{var}}) %>% unique()
+}
+
+#' @export
+pu <- pull_unique
+
+get_all_prefixes <- function(bs, value, max_level = 2, min_freq = 2) {
+  pat_str <- sprintf("%s$", value)
+  base <- bs %>%
+    filter(n_xy >= min_freq, str_detect(value, pat_str))
+  if(nrow(base) == 0){
+    return(character(0))
+  }
+  uni_probs <- bs %>% filter(level == 1) %>% parkR::freq_table(x)
+  singles <- base %>%
+    filter(level == 1, n_xy >= min_freq) %>%
+    mutate(level = 0, n_xy = n_x, pmi = 1, value = x) %>%
+    distinct(level, n_xy, pmi, value) %>%
+    left_join(uni_probs %>% distinct(value = x, f_xy = freq)) %>%
+    mutate(value = as.character(value))
+
+  #browser()
+  prefixes <- base %>%
+    filter(level > 1, n_xy >= min_freq) %>%
+    distinct(bi_enc = x, level) %>%
+    mutate(level = level - 1)
+  values <- bs %>%
+    filter(n_xy >=  min_freq) %>%
+    inner_join(prefixes, by = c("bi_enc", "level")) %>%
+    distinct(level, n_xy, f_xy, pmi, value )
+
+
+  values %>% bind_rows(singles) %>% arrange(level, desc(n_xy), value)
+}
+
+get_all_prefixes2 <- function(bs, value, min_freq = 2){
+  pat_str <- sprintf("%s$", value)
+  prefixes <-
+    bs %>%
+    filter(level > 1, n_xy >= min_freq ) %>%
+    filter(str_detect(value, pat_str)) %>%
+    distinct(value, level, n_xy) %>%
+    pu(value) %>%
+    value_to_vec() %>%
+    map(~{paste(.x[-length(.x)], collapse = ",")})  %>%
+    unlist()
+  #browser()
+  bs %>%
+    filter(value %in% prefixes) %>%
+    distinct(level, n_xy, f_xy, pmi, value )
+}
+
+get_last_element_from_value <- function(value){
+  #browser()
+  last <- function(x) x[[length(x)]]
+  if(length(value) == 1){
+    return(last(value_to_vec(value)))
+  }
+  sapply(value_to_vec(value, "character", collapse = F), (function(x) as.character(last(x))), simplify = T)
+}
+
+predict_next <- function(bs, context, max_level = -1, alphabet = NULL){
+  if(max_level < 0 || is.na(max_level) || is.infinite(max_level)){
+    max_level <- max(bs$level)
+  }
+  #browser()
+  if(is.character(context) & length(context) == 1) {
+    tmp <- value_to_vec(context, "character", collapse = F)[[1]]
+    if(str_detect(context, "\\(")){
+      tmp <- sprintf("(%s)", tmp)
+    }
+  }
+  else{
+    tmp <- context
+  }
+
+  l <- length(tmp)
+  if(length(tmp) > max_level){
+    tmp <- tmp[(l - max_level + 1):l]
+    l <- length(tmp)
+    #messagef("Value too long for max_level, truncating to %s", paste(tmp, collapse = ","))
+  }
+  #browser()
+  if(is.null(alphabet)){
+    test <- tmp[l]
+    abc <- bs %>% filter(level == 1) %>% pu(x) %>% as.character()
+    if(!(tmp[l] %in% abc)){
+      test <- integer(0)
+    }
+  }
+  else{
+    test <- which(alphabet == tmp[l])
+  }
+
+  if(length(test) == 0){
+    stop(sprintf("Cannot predict from unknown symbol '%s'", tmp[l]))
+  }
+
+  singles <-  bs[bs$level == 1 & bs$x == test,] %>%
+    distinct(n_xy, f_xy, level, local_context = x, value, pred = y) %>%
+    mutate(value = as.character(value),
+           pred = as.character(pred),
+           local_context = as.character(local_context),
+           log_p = -log2(f_xy))
+
+  if(!is.null(alphabet)){
+    singles <- singles %>%
+      mutate(pred = alphabet[as.integer(pred)],
+             local_context = alphabet[as.integer(local_context)])
+  }
+
+  ret <- NULL
+  if(l > 1){
+    ret <- map_dfr(seq(max(1, l - 1), 1), function(i){
+      #browser()
+      cur_val <- tmp[i:l] %>% paste(collapse = ",")
+      cur_level <- l - i
+      base <- bs[bs$value == cur_val,]
+      #messagef("Testing: %s (i = %d, l = %d, cur_level = %d), found %d rows", cur_val, i, l, cur_level, nrow(base))
+      if(nrow(base) == 0){
+        return(NULL)
+      }
+      enc <- base %>% pu(bi_enc)
+      bs[bs$x == enc & bs$level == cur_level + 1,] %>%
+        distinct(n_xy, f_xy, level, value) %>%
+        mutate(local_context = cur_val)
+    })
+    #browser()
+    if(nrow(ret) > 0) ret <- ret %>% mutate(pred = get_last_element_from_value(value), log_p = -log2(f_xy))
+  }
+
+  bind_rows(singles, ret) %>%
+    mutate(context = paste(tmp, collapse = ",")) %>%
+    group_by(pred) %>%
+    mutate(mean_log_p = mean(log_p),
+           min_log_p = min(log_p)) %>%
+    ungroup() %>%
+    arrange(min_log_p, desc(level), desc(f_xy))
+
+}
+
+escape_search_pattern <- function(pattern){
+  str_replace_all(pattern, "\\(", "\\\\(") %>%
+    str_replace_all("\\|", "\\\\|") %>%
+    str_replace_all("\\)", "\\\\)")
+}
+
+test_predictions <- function(bs, window_size= 5, num_windows = 10, offset = 0, max_order = 2, alphabet = NULL ){
+  if(is.null(alphabet)){
+    seq <- bs %>% filter(level == 1) %>% pull(x) %>% as.character()
+  }
+  else{
+    seq <- alphabet[bs %>% filter(level == 1) %>% pull(x)]
+
+  }
+
+  map_dfr(1:num_windows, function(i){
+    if(i + offset + window_size - 1 > length(seq)){
+      return(NULL)
+    }
+    browser()
+    snip <- seq[(i + offset):(i + offset + window_size-1)]
+    predictions <-  suppressWarnings(
+      predict_next(bs, snip, max_level = max_order, alphabet = alphabet)
+    )
+    best <- predictions %>% filter(mean_log_p == min(mean_log_p))
+    pred <- best %>% pu(pred)
+    ic_pred <- best %>% pu(mean_log_p)
+    truth <- seq[i + offset + window_size]
+    ic_truth <- predictions %>% filter(pred == truth) %>% pu(mean_log_p)
+    #browser()
+
+    tibble(pos = i + offset + window_size,
+           truth = truth,
+           prediction = pred,
+           ic_truth = ic_truth,
+           ic_pred = ic_pred)
+  }) %>%
+    mutate(match = truth == prediction, diff_ic = ic_truth - ic_pred)
+}
+
+

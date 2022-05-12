@@ -41,6 +41,17 @@ interval_vector_to_pitch <- function(int_vector, start_pitch = 60, root = NULL){
   pitch_vec
 }
 
+select_by_id <- function(df, id = NULL, id_var = "id"){
+  if (is.null(id)){
+    return(df)
+  }
+  if (is.numeric(id)){
+    id <- levels(factor(df[[id_var]]))[id]
+  }
+  df[df[[id_var]] %in% id,]
+}
+
+
 #' @export
 pull_unique <- function(df, var){
   df %>% pull(!!enquo(var)) %>% unique()
