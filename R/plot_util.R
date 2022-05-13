@@ -513,14 +513,12 @@ durclass_hist <- function(data,
                           legend.y = .8,
                           percentage = T,
                           fill_var = NULL){
-  browser()
   tmp <- select_by_id(data, id)
   if (is.null(fill_var)){
     #tmp <- reshape2::melt(tmp[, c(id_var, "durclass_rel_raw", "durclass_abs_raw")])
     tmp <- tmp %>%
       select(all_of(c(id_var, durclass_col, durclass_col2))) %>%
       pivot_longer(-!!sym(id_var))
-    browser()
     tmp$name <- factor(tmp$name, labels = cmp_labels)
     q <- ggplot(tmp %>% filter(!is.na(value)), aes(x = factor(value, levels = -2:2)))
     q <- add_geom_bar(q, percentage = percentage, fill_var = "name")
