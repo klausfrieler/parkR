@@ -30,3 +30,22 @@ NULL
 
 #' @importFrom utils write.table
 NULL
+
+#' @importFrom httr GET
+NULL
+
+#' @importFrom httr POST
+NULL
+
+#' @importFrom httr modify_url
+NULL
+
+#' @importFrom httr http_error
+NULL
+
+#' @importFrom jsonlite fromJSON
+NULL
+
+#' @importFrom furrr future_map_dfr
+NULL
+

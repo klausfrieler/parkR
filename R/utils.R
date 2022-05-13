@@ -179,7 +179,7 @@ last_n <- function(x, n = 1){
 
 pretty_print_pitches <- function(pitch_vector){
   octaves <- as.integer(floor((pitch_vector - 60) / 12 + 4))
-  print(paste(pc_labels_flat[pitch_vector %%12 +1], octaves, collapse="-", sep=""))
+  print(paste(pc_labels_flat[pitch_vector %% 12 +1], octaves, collapse = "-", sep = ""))
 }
 
 fill_diff <- function(x, fill = NA, post = T){
@@ -200,3 +200,65 @@ relative_register_position <- function(pitch, pitch_range){
   np <- pitch - pitch_range[1]
   np/span
 }
+
+#' classify_int_pattern
+#' Classifies interval pattern in a main type (cool/uncool) and a subtype (scale, repetition, other, trill)
+#' @param pattern (string vector) Vector of interval patterns as comma-separated list of semi-tone intervals
+#'
+#' @return Data frame of classifications
+#' @export
+classify_int_pattern <- function(pattern){
+  if(length(pattern) > 1){
+    return(map_dfr(pattern, classify_int_pattern))
+  }
+  #browser()
+  #printf("Classifying pattern %s", pattern)
+  x <- value_to_vec(pattern)
+  main_type <- "cool"
+  main_type <- "other"
+  #get rid of repetitions
+  x_sz <- x[x != 0]
+  #1. only repetition: uncool
+  #print(x_sz)
+  if(length(x_sz) <= 1){
+    return(tibble(main_type =  "uncool", sub_type = "repetition"))
+  }
+  if(length(x_sz) < 4){
+    return(tibble(main_type =  "cool", sub_type = "other"))
+  }
+  #get cumsum
+  cs <- c(0, cumsum( x_sz))
+
+  #print(cs)
+  #get period of potential trill
+  zero_pos <- which(cs == 0)
+  #print(zero_pos)
+  if(length(zero_pos) > 2){
+    if(length(cs) %in% zero_pos || length(zero_pos) >= 3){
+
+      periods <- unique(diff(zero_pos))
+      #print(periods)
+      if(length(periods) <= 1){
+        if(length(cs)/length(zero_pos) <= periods[1]){
+          #printf("l(x_sz) = %d, l(zp) = %d, r = %f, periods = %d", length(cs), length(zero_pos), length(cs)/length(zero_pos), periods[1])
+          #print(cs[zero_pos[1]:(zero_pos[2]-1)])
+          #print(cs[zero_pos[2]:(zero_pos[3]-1)])
+          if(identical(cs[zero_pos[1]:(zero_pos[2] - 1)], cs[zero_pos[2]:(zero_pos[3] - 1)])){
+            return(tibble(main_type =  "uncool", sub_type = "trill"))
+          }
+
+        }
+      }
+    }
+  }
+  #check for scales
+  steps <- union(unique(abs(x)), c(1,2))
+  #print(steps)
+  is_scale <- length(steps) == 2
+  if (is_scale){
+    return(tibble(main_type =  "uncool", sub_type = "scale"))
+
+  }
+  tibble(main_type =  "cool", sub_type = "other")
+}
+

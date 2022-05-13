@@ -1,9 +1,9 @@
 #library(tidyverse)
 #source("utils.R")
-pc_labels<-c("C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "Bb", "B")
-pc_labels_sharp<-c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
-pc_labels_flat<-c("C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B")
-pc_labels_combined <- c(pc_labels_sharp, setdiff(pc_labels_flat, pc_labels_sharp))
+# pc_labels <-parkR::labels[["pc_labels"]]
+# pc_labels_sharp <- labels[["pc_labels_sharp"]]
+# pc_labels_flat <- labels[["pc_labels_flat"]]
+# pc_labels_combined <- c(pc_labels_sharp, setdiff(pc_labels_flat, pc_labels_sharp))
 note_names <- LETTERS[1:7]
 
 ionian    <- c(0, 2, 4, 5, 7, 9, 11)
@@ -188,13 +188,13 @@ tone_name_to_pc <- Vectorize(function(tone){
   if(tone == "Fb"){
     return(4L)
   }
-  flat_pc <- which(tone ==  pc_labels_flat)
-  sharp_pc <- which(tone ==  pc_labels_sharp)
+  flat_pc <- which(tone ==  labels$pc_labels_flat)
+  sharp_pc <- which(tone ==  labels$pc_labels_sharp)
   if(length(flat_pc) != 0){
-    pc <- flat_pc -1
+    pc <- flat_pc - 1
   }
   else if(length(sharp_pc) != 0){
-    pc <- sharp_pc -1
+    pc <- sharp_pc - 1
   }
   else {
     messagef("Invalid tone %s", tone)
@@ -335,7 +335,7 @@ chord_to_lilypond <- function(chord_labels, lengths = NULL){
 #'
 #' @param pitches (integer vector) pitches to transform
 #' @param chord (character vector or tibble of parsed chords) chords to be used for calculating CDPCX classes, length must either match or it must be a single chord label
-#' @return character vector of CDPCX values. (1-7 diatonic steps, - = b9, % = b13, B = #9 blues third, T = tritone (#11), > major third over minor chord, < = minor seventh over major 7th chord, L = major seventh over chord with minor seventh
+#' @return character vector of CDPCX values. (1-7 diatonic steps, - = b9, \% = b13, B = #9 blues third, T = tritone (#11), > major third over minor chord, < = minor seventh over major 7th chord, L = major seventh over chord with minor seventh
 #' @export
 get_cdpcx <- function(pitches, chord){
   #print(chord)

@@ -88,7 +88,7 @@ add_key <- function(keys, mode, chord, offset = 0){
     key <- sprintf("%s-%s", chord$root[1], mode)
   }
   else{
-    key <- sprintf("%s-%s", pc_labels_flat[((chord$pc[1]  + offset) %% 12)  + 1], mode)
+    key <- sprintf("%s-%s", labels$pc_labels_flat[((chord$pc[1]  + offset) %% 12)  + 1], mode)
   }
   c(keys, key)
 }

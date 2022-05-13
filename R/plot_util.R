@@ -325,8 +325,6 @@ add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, c
 #'
 #' @return A ggplot2 object
 #' @export
-#'
-#' @examples
 cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fill_var = NULL, cdpcx_col = "cdpcx_raw_all"){
   tmp <- select_by_id(data, id)
   tmp <- tmp[tmp[[cdpcx_col]] != "X",]
@@ -372,8 +370,6 @@ cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fi
 #'
 #' @return A ggplot2 object
 #' @export
-#'
-#' @examples
 pc_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, pc_col = "pc_raw"){
   tmp <- select_by_id(data, id)
   q <- ggplot(tmp, aes(x = factor(!!sym(pc_col), levels = 0:11)))
@@ -395,8 +391,6 @@ pc_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, pc_col = "
 
 #' @return A ggplot2 object
 #' @export
-#'
-#' @examples
 pitch_hist <- function(data, id = NULL, reduced_labels = F, percentage = T, fill_var = NULL, pitch_col = "pitch_raw"){
   tmp <- select_by_id(data, id)
   min_p <- min(tmp[[pitch_col]])
@@ -426,8 +420,6 @@ pitch_hist <- function(data, id = NULL, reduced_labels = F, percentage = T, fill
 #'
 #' @return
 #' @export
-#'
-#' @examples
 mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col = "mcm_48", x_labels = labels[["metric_pos_4_4"]]){
   tmp <- select_by_id(data, id)
   #tmp$full_beats <- factor(tmp$mcm_48 %% 12 == 0, labels=c("Offbeat", "Beat"))
@@ -438,4 +430,111 @@ mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col
   q <- q +  scale_x_discrete(name = "Metrical Circle Map (N = 48)", drop = FALSE, labels = x_labels)
   return(q)
 
+}
+
+#' int_hist
+#' Plots a fancy Semitone interval histogram
+#' @param data (data frame) Must contain "int_col" as column with MCM data
+#' @param id (string or integer) Optional set of ids to filter
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param cut_off (integer) Cutoff the distribution beyond this value (default 25)
+#' @param int_col (string) name of the column containing the interval data  (default "int_raw")
+#'
+#' @return ggplot2 object
+#' @export
+int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "int_raw"){
+  tmp <- select_by_id(data, id)
+  tmp <- tmp[!is.na(tmp[["int_col"]]),]
+  tmp <- tmp[abs(tmp[["int_col"]]) < cut_off,]
+  ext <- max(abs(min(tmp[["int_col"]])), abs(max(tmp[["int_col"]])))
+  #cat("min=", min(tmp$int_raw), "max=",  max(tmp$int_raw), "\n")
+  tmp[["int_col"]] <-  factor(tmp[["int_col"]], levels = -ext:ext)
+  labels <- rep("", 49)
+  if (ext > 14){
+    marks = c(-24, -19, -12, -7, -5, -2, 0, 2, 7, 5, 12, 19, 24)
+    #print  (ext)
+    labels[marks + 25] = marks
+    labels <- labels[(25 - ext):(25 + ext + 1)]
+    #cat(ext, 25-ext, 25+ext+1, length(labels), "\n")
+    #print(labels)
+  }
+  else{
+    labels = -ext:ext
+  }
+  q <- ggplot(tmp, aes(x=!!sym(int_col)))
+  q <- add_geom_bar(q, percentage)
+
+  q <- q + get_default_theme() + theme(legend.position = "none")
+  q <- q + scale_x_discrete(name = "Semitone Interval", drop = FALSE, labels = labels)
+  q
+}
+
+#' int_hist
+#' Plots a fancy Fuzzy interval histogram
+#' @param data (data frame) Must contain "fuzzyint_col" as column with fuzzy interval data (integers -4 to 4)
+#' @param id (string or integer) Optional set of ids to filter
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param fill_var (string) Additional filler variable
+#' @param fuzzyint_col (string) name of the column containing the interval data  (default "int_raw")
+#'
+#' @return ggplot2 object
+#' @export
+fuzzyint_hist <- function(data, id = NULL, percentage = T,  fill_var = NULL, fuzzyint_col = "fuzzyint_raw"){
+  tmp <- select_by_id(data, id)
+  tmp<-tmp[!is.na(tmp[["fuzzyint_col"]]),]
+
+  q <- ggplot(tmp, aes(x = factor(!!sym(fuzzyint_col), levels = -4:4)))
+  q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
+
+  q <- q + get_default_theme(x_rotate = 45) + theme(legend.position = "none")
+  q <- q + scale_x_discrete(name="Fuzzy Interval", drop=FALSE, labels = labels$fuzzy_labels)
+  q
+}
+
+#' durclass_hist
+#' Plots a fancy duration class histogram
+#' @param data (data frame) Must contain "fuzzyint_col" as column with duration clas data (integers from -2 (very short) to 2 (very long))
+#' @param id (string or integer) Optional set of ids to filter
+#' @param id_var (string or integer) Name of the column in data that contains the id var (allows grouping by different variables)
+#' @param fuzzyint_col (string) name of the column containing the interval data  (default "int_raw")
+#' @param legend.x, legend.y (numeric) position of the legend, for nice inserts.
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param fill_var (string) Additional filler variable
+#'
+#' @return ggplot2 object
+#' @export
+durclass_hist <- function(data,
+                          id = NULL,
+                          id_var = "id",
+                          durclass_col = "durclass_abs_raw",
+                          durclass_col2 = "durclass_rel_raw",
+                          cmp_labels = c("Absolute", "Relative"),
+                          legend.x = .8,
+                          legend.y = .8,
+                          percentage = T,
+                          fill_var = NULL){
+  browser()
+  tmp <- select_by_id(data, id)
+  if (is.null(fill_var)){
+    #tmp <- reshape2::melt(tmp[, c(id_var, "durclass_rel_raw", "durclass_abs_raw")])
+    tmp <- tmp %>%
+      select(all_of(c(id_var, durclass_col, durclass_col2))) %>%
+      pivot_longer(-!!sym(id_var))
+    browser()
+    tmp$name <- factor(tmp$name, labels = cmp_labels)
+    q <- ggplot(tmp %>% filter(!is.na(value)), aes(x = factor(value, levels = -2:2)))
+    q <- add_geom_bar(q, percentage = percentage, fill_var = "name")
+    q <- q + theme(legend.position = c(legend.x, legend.y), legend.title = element_blank())
+  }
+  else{
+    tmp <- tmp %>% mutate(!!sym(durclass_col) := factor(!!sym(durclass_col), levels = -2:2))
+    q <- ggplot(tmp, aes(x = !!sym(durclass_col)))
+    q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
+    q <- q + theme(legend.position = c(legend.x, legend.y))
+
+  }
+  q <- q + get_default_theme(keep_legend = T)
+  q <- q + scale_x_discrete(name = "Duration classes", drop = FALSE, labels = labels$durclass_labels)
+  #q <- q + scale_fill_manual(values=jazzomat_pallette, name="", labels=c("Relative", "Absolute"))
+  q
 }

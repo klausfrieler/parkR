@@ -1,7 +1,19 @@
 #library(tidyverse)
 
+#' printf
+#' Combines sprintf and print
+#' @param ...
+#'
+#' @export
 printf <- function(...) print(sprintf(...))
+
+#' messagef
+#' Combines sprintf and message
+#' @param ...
+#'
+#' @export
 messagef <- function(...) if(parkR::parkr_options()$debug) message(sprintf(...))
+
 
 #' @export
 value_to_vec <- function(value_str, type = c("integer", "character"), collapse = ""){

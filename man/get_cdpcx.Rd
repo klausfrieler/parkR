@@ -12,7 +12,7 @@ get_cdpcx(pitches, chord)
 \item{chord}{(character vector or tibble of parsed chords) chords to be used for calculating CDPCX classes, length must either match or it must be a single chord label}
 }
 \value{
-character vector of CDPCX values. (1-7 diatonic steps, - = b9, % = b13, B = #9 blues third, T = tritone (#11), > major third over minor chord, < = minor seventh over major 7th chord, L = major seventh over chord with minor seventh
+character vector of CDPCX values. (1-7 diatonic steps, - = b9, \% = b13, B = #9 blues third, T = tritone (#11), > major third over minor chord, < = minor seventh over major 7th chord, L = major seventh over chord with minor seventh
 }
 \description{
 This function transforms a set of (MIDI) pitches given a list of chords into the corresponding Extended Chordal Diatonic Pitch Classes (CDPCX)
