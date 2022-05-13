@@ -443,7 +443,6 @@ mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col
 #' @return ggplot2 object
 #' @export
 int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "int_raw"){
-  browser()
   tmp <- select_by_id(data, id)
   tmp <- tmp[!is.na(tmp[[int_col]]),]
   tmp <- tmp[abs(tmp[[int_col]]) < cut_off,]
