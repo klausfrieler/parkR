@@ -425,7 +425,7 @@ mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col
   #tmp$full_beats <- factor(tmp$mcm_48 %% 12 == 0, labels=c("Offbeat", "Beat"))
   q <- ggplot(tmp, aes(x = factor(!!sym(mcm48_col), levels = c(0:47))))
   q <- q + scale_color_manual(values = c("white", "black"))
-  q <- q +  get_default_theme() + theme(legend.position="none")
+  q <- q + get_default_theme() + theme(legend.position="none")
   q <- add_geom_bar(q, percentage, fill_var)
   q <- q +  scale_x_discrete(name = "Metrical Circle Map (N = 48)", drop = FALSE, labels = x_labels)
   return(q)
@@ -443,20 +443,17 @@ mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col
 #' @return ggplot2 object
 #' @export
 int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "int_raw"){
+  browser()
   tmp <- select_by_id(data, id)
-  tmp <- tmp[!is.na(tmp[["int_col"]]),]
-  tmp <- tmp[abs(tmp[["int_col"]]) < cut_off,]
-  ext <- max(abs(min(tmp[["int_col"]])), abs(max(tmp[["int_col"]])))
-  #cat("min=", min(tmp$int_raw), "max=",  max(tmp$int_raw), "\n")
-  tmp[["int_col"]] <-  factor(tmp[["int_col"]], levels = -ext:ext)
+  tmp <- tmp[!is.na(tmp[[int_col]]),]
+  tmp <- tmp[abs(tmp[[int_col]]) < cut_off,]
+  ext <- max(abs(min(tmp[[int_col]])), abs(max(tmp[[int_col]])))
+  tmp[[int_col]] <-  factor(tmp[[int_col]], levels = -ext:ext)
   labels <- rep("", 49)
   if (ext > 14){
     marks = c(-24, -19, -12, -7, -5, -2, 0, 2, 7, 5, 12, 19, 24)
-    #print  (ext)
     labels[marks + 25] = marks
     labels <- labels[(25 - ext):(25 + ext + 1)]
-    #cat(ext, 25-ext, 25+ext+1, length(labels), "\n")
-    #print(labels)
   }
   else{
     labels = -ext:ext
@@ -481,13 +478,13 @@ int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "i
 #' @export
 fuzzyint_hist <- function(data, id = NULL, percentage = T,  fill_var = NULL, fuzzyint_col = "fuzzyint_raw"){
   tmp <- select_by_id(data, id)
-  tmp<-tmp[!is.na(tmp[["fuzzyint_col"]]),]
+  tmp <- tmp[!is.na(tmp[[fuzzyint_col]]),]
 
   q <- ggplot(tmp, aes(x = factor(!!sym(fuzzyint_col), levels = -4:4)))
   q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
 
   q <- q + get_default_theme(x_rotate = 45) + theme(legend.position = "none")
-  q <- q + scale_x_discrete(name="Fuzzy Interval", drop=FALSE, labels = labels$fuzzy_labels)
+  q <- q + scale_x_discrete(name = "Fuzzy Interval", drop = FALSE, labels = labels$fuzzy_labels)
   q
 }
 
@@ -533,6 +530,5 @@ durclass_hist <- function(data,
   }
   q <- q + get_default_theme(keep_legend = T)
   q <- q + scale_x_discrete(name = "Duration classes", drop = FALSE, labels = labels$durclass_labels)
-  #q <- q + scale_fill_manual(values=jazzomat_pallette, name="", labels=c("Relative", "Absolute"))
   q
 }
