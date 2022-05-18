@@ -62,13 +62,16 @@ build_bigram_stack <- function(x, max_level = 3, sd_threshold = 1.0, ids = NULL,
         ids <- ids$id
     }
     messagef("Adding ids")
-    if(!early_break){
-      ret <- ret %>% arrange(pos)
-      ret$id <- rep(ids, each = max_level)
-    }
-    else{
-      ret <- ret %>% left_join(tibble(pos = 1:length(ids), id = unique(ids)), by = "pos")
-    }
+    max_level <- max(ret$level)
+    ret <- ret %>% arrange(pos)
+    ret$id <- rep(ids, each = max_level)
+    # if(early_break){
+    #   ret <- ret %>% arrange(pos)
+    #   ret$id <- rep(ids, each = max_level)
+    # }
+    # else{
+    #   #ret <- ret %>% left_join(tibble(pos = 1:length(ids), id = unique(ids)), by = "pos")
+    # }
     messagef("Adding document frequencies")
     ret <- ret %>% group_by(bigram_id) %>% mutate(DF = n_distinct(id)) %>% ungroup()
   } else{

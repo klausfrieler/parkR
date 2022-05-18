@@ -140,3 +140,11 @@ NULL
 #' @name labels
 #' @docType data
 NULL
+
+
+#' jazzomat_palette
+#'
+#' Palette used in the "Inside the Jazzomat" book
+#' @name jazzomat_palette
+#' @docType data
+NULL

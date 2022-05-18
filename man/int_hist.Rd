@@ -5,7 +5,15 @@
 \title{int_hist
 Plots a fancy Semitone interval histogram}
 \usage{
-int_hist(data, id = NULL, cut_off = 25, percentage = T, int_col = "int_raw")
+int_hist(
+  data,
+  id = NULL,
+  cut_off = 25,
+  percentage = T,
+  int_col = "int_raw",
+  fill_var = NULL,
+  reduced_labels = T
+)
 }
 \arguments{
 \item{data}{(data frame) Must contain "int_col" as column with MCM data}

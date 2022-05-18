@@ -328,6 +328,7 @@ add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, c
 cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fill_var = NULL, cdpcx_col = "cdpcx_raw_all"){
   tmp <- select_by_id(data, id)
   tmp <- tmp[tmp[[cdpcx_col]] != "X",]
+  tmp <- tmp[tmp[[cdpcx_col]] != "",]
   if (nrow(tmp) == 0){
     return(NULL)
     # tmp <- select_by_id(data, id)
@@ -442,14 +443,14 @@ mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col
 #'
 #' @return ggplot2 object
 #' @export
-int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "int_raw"){
+int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "int_raw", fill_var = NULL, reduced_labels = T){
   tmp <- select_by_id(data, id)
   tmp <- tmp[!is.na(tmp[[int_col]]),]
   tmp <- tmp[abs(tmp[[int_col]]) < cut_off,]
   ext <- max(abs(min(tmp[[int_col]])), abs(max(tmp[[int_col]])))
   tmp[[int_col]] <-  factor(tmp[[int_col]], levels = -ext:ext)
   labels <- rep("", 49)
-  if (ext > 14){
+  if (reduced_labels || ext > 14){
     marks = c(-24, -19, -12, -7, -5, -2, 0, 2, 7, 5, 12, 19, 24)
     labels[marks + 25] = marks
     labels <- labels[(25 - ext):(25 + ext + 1)]
@@ -458,7 +459,7 @@ int_hist <- function(data, id = NULL, cut_off = 25, percentage = T, int_col = "i
     labels = -ext:ext
   }
   q <- ggplot(tmp, aes(x=!!sym(int_col)))
-  q <- add_geom_bar(q, percentage)
+  q <- add_geom_bar(q, percentage, fill_var = fill_var)
 
   q <- q + get_default_theme() + theme(legend.position = "none")
   q <- q + scale_x_discrete(name = "Semitone Interval", drop = FALSE, labels = labels)
