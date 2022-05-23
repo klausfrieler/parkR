@@ -14,8 +14,6 @@
 #'
 #' @return Search ID, to be used in DTL_get_results
 #' @export
-#'
-#' @examples
 DTL_similarity_search <- function(search_pattern = "1,2,1,2,1,2,1,2",
                                   transformation = c("interval", "pitch", "fuzzyinterval"),
                                   database_names = "dtl,wjazzd,omnibook",
@@ -96,8 +94,6 @@ DTL_get_results <- function(search_id){
 #'
 #' @return Search ID, to be used in DTL_get_results
 #' @export
-#'
-#' @examples
 DTL_similarity_search_results <- function(search_patterns = "1,2,1,2,1,2,1,2",
                                           transformation = c("interval", "pitch", "fuzzyinterval"),
                                           database_names = "dtl,wjazzd,omnibook",
@@ -150,8 +146,6 @@ DTL_similarity_search_results <- function(search_patterns = "1,2,1,2,1,2,1,2",
 #'
 #' @return Search ID, to be used in DTL_get_results
 #' @export
-#'
-#' @examples
 DTL_similarity_search_results_fast <- function(search_patterns = "1,2,1,2,1,2,1,2",
                                                transformation = c("interval", "pitch", "fuzzyinterval"),
                                                database_names = "dtl,wjazzd,omnibook",

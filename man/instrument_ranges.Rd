@@ -5,5 +5,5 @@
 \alias{instrument_ranges}
 \title{instrument_ranges}
 \description{
-Tibble of instrument ranges, extracted from the Weimar Jazz Databse, min(imum), max(imum),  5% (q5) and 95% (q95) percentiles
+Tibble of instrument ranges, extracted from the Weimar Jazz Database, min(imum), max(imum),  5% (q5) and 95% (q95) percentiles
 }

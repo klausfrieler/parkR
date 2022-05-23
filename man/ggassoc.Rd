@@ -9,10 +9,13 @@ ggassoc(
   cont_tab,
   x_lab = "",
   y_lab = "",
+  title = "Chi-Square Residuals",
   subtitle = "",
   spread = 2.25,
   text_size = 3,
-  fill_colors = c("black", "red")
+  fill_colors = jazzomat_palette$set1[1:2],
+  std = F,
+  raw = T
 )
 }
 \arguments{

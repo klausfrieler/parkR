@@ -151,7 +151,7 @@ solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120
   if(!is.null(lead_sheet)){
     chord_seq <- setNames(4/lead_sheet$duration, chord_to_lilypond(lead_sheet$chord))
   }
-  browser()
+  #browser()
   tabr::as_music(notes = notes, info = tmp$tabr_dur) %>%
     p() %>%
     track(tab = F) %>%

@@ -159,9 +159,12 @@ get_chord_tone_links <- function(solo){
 }
 
 get_all_chord_tone_links <- function(data){
+  if(!requireNamespace("jazzodata", quietly = T)){
+    stop("cannot find 'jazzodata' package")
+  }
   solos <- unique(data$id)
   solo_links <- purrr::map_dfr(solos, function(x){
-    tmp <- get_chord_tone_links(wjd_transforms %>% filter(id == x))
+    tmp <- get_chord_tone_links(jazzodata::wjd_transforms %>% filter(id == x))
     if(nrow(tmp)){
       tmp$id <- x
       return(tmp)

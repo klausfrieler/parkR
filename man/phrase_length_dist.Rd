@@ -5,5 +5,5 @@
 \alias{phrase_length_dist}
 \title{phrase_length_dist}
 \description{
-Disbtribution of phrase lengths and relative phrase positions extracted from the Weimar Jazz Database
+Distribution of phrase lengths and relative phrase positions extracted from the Weimar Jazz Database
 }

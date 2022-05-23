@@ -30,8 +30,11 @@ min_6_tetra <- c(0, 3, 6, 9)
 minor_blues  <- c(0, 3, 5, 6, 7, 10)
 major_blues <- c(0, 2, 3, 4, 7, 9)
 mixo_blues  <- c(0, 2, 3, 4, 5, 7, 9, 10)
+chromatic <- 0:11
 
+#' @export
 scales <- list("ionian"  = ionian,
+               "major" = ionian,
                "dorian" = dorian,
                "phrygian" = phrygian,
                "lydian" =  lydian,
@@ -54,7 +57,9 @@ scales <- list("ionian"  = ionian,
                "min_6_tetra"  = min_6_tetra,
                "minor_blues" = minor_blues,
                "major_blues" = major_blues,
-               "mixo_blues"  = mixo_blues
+               "mixo_blues"  = mixo_blues,
+               "minor" = aeolian,
+               "chromatic" = chromatic
 )
 chord_definitions <- list()
 
@@ -626,9 +631,12 @@ create_leadsheet_from_irb <- function(compid, name = NULL, with_form = F){
 #' @return A leed sheet data frame
 #' @export
 create_leadsheet_from_wjd_db <- function(compid, name = NULL, with_form = F){
+  if(!requireNamespace("jazzodata", quietly = T)){
+    stop("Creating leadsheets von WJD requires 'jazzodata' package")
+  }
   db <- parkR::wjd_chord_db %>%
     rename(chord = original, section = form_name) %>%
-    left_join(parkR::wjd_meta %>%
+    left_join(jazzodata::wjd_meta %>%
                 select(title, id, composer, date = recordingyear, key, time = signature), by = "id")
   create_leadsheet_from_chord_db(db, compid, name, with_form)
 }
@@ -663,7 +671,7 @@ create_leadsheet <- function(name, chords, length_beats){
 #' @return A data frame of generated solos
 #' @export
 simulate_wjd <- function(ids = 1:456){
-  wjd_meta <- parkR::wjd_meta %>% mutate(compid = as.integer(factor(id)))
+  wjd_meta <- jazzodata::wjd_meta %>% mutate(compid = as.integer(factor(id)))
   ids <- as.integer(ids)
   ids <- ids[ids >= 1  & ids <= 456 ]
   map_dfr(ids, function(cid) {

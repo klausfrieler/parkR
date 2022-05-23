@@ -24,6 +24,9 @@ get_simple_successor_list <- function(data, var, reduce_frac = 0){
 
 setup_distibrutions <- function(recalc = F){
   if(recalc){
+    if(!requireNamespace("jazzodata", quietly = TRUE)){
+      stop("Recalculation of distributions requries 'jazzodata' package.")
+    }
     phrase_begin_dist <- WBA_df %>%
       filter(start == 1) %>%
       select(length, type, direction, value) %>%
@@ -52,7 +55,7 @@ setup_distibrutions <- function(recalc = F){
   }
 
   if(recalc){
-    succ_ioiclass <- get_simple_successor_list(wjd_transforms, "ioiclass_abs_raw", .01)
+    succ_ioiclass <- get_simple_successor_list(jazzodata::wjd_transforms, "ioiclass_abs_raw", .01)
     save(succ_ioiclass, "data/succ_ioiclass")
   }
   else{
@@ -61,7 +64,7 @@ setup_distibrutions <- function(recalc = F){
   }
 
   if(recalc){
-    length_dist <- wjd_transforms %>%
+    length_dist <- jazzodata::wjd_transforms %>%
       group_by(id) %>%
       summarise(num_phrases = max(phrase_id_raw))
     save(length_dist, "data/length_dist.rda")

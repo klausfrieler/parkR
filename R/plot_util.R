@@ -73,6 +73,7 @@ labels[["MIDI_note_names"]] <- MIDI_full
 labels[["MIDI_note_names_reduced"]] <- MIDI_reduced_labels
 
 usethis::use_data(labels, overwrite = T)
+usethis::use_data(jazzomat_palette, overwrite = T)
 
 #' nice_cdpcx
 #' Makes a nice (sorted, labeled) cdpcx factor

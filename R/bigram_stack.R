@@ -98,7 +98,7 @@ retrieve_ngram <- function(bigram_stack, bi_enc, level){
 
 }
 
-get_ngrams <- function(bi_enc = NULL, pos = NULL, level, bigram_stack = bbh, orig_data = wjd_transforms$int_raw){
+get_ngrams <- function(bi_enc = NULL, pos = NULL, level, bigram_stack = bbh, orig_data){
   if(is.null(pos)){
     stopifnot(!is.null(bi_enc))
     pos <- bigram_stack %>% filter(level == !!level, bi_enc %in% !!bi_enc) %>% pull(pos)
@@ -494,6 +494,38 @@ get_last_element_from_value <- function(value){
     return(last(value_to_vec(value)))
   }
   sapply(value_to_vec(value, "character", collapse = F), (function(x) as.character(last(x))), simplify = T)
+}
+
+#' get_value_context
+#' Retrieves all context n-grams for a value in a bigram stack
+#' @param bs  A bigram_stack object
+#' @param value (string) value in bigram stack
+#' @param pre (integer) Length of context before value
+#' @param post  (integer) Length of context after value
+#' @param only_values (boolean) Flag, whether to return only unique context values
+#'
+#' @return Either a subset with context n-grams of the bigram stack or string of context values
+#' @export
+get_value_context <- function(bs, value, pre = 0, post = 0, only_values = F){
+  pre <- max(0, pre)
+  post = max(0, post)
+  tmp <- bs %>% filter(value == {{value}})
+  if(nrow(tmp) == 0){
+    if(only_values){
+      return(character(0))
+    }
+    return(tmp)
+  }
+  value_N = unique(tmp$N)
+  N_min <- max(value_N - pre, 1)
+  N_max <- min(value_N + post, max(bs$N))
+  context_N <- min(value_N + pre + post, max(bs$N))
+  value_pos <- tmp %>% pu(pos)
+  start_pos <- pmax(value_pos - pre, 1)
+  #ends <- pmin(value_pos + post, max(bs$pos))
+  tmp <- bs %>% filter(N == context_N) %>% filter(pos %in% start_pos)
+  if(only_values) tmp <- tmp %>% pu(value)
+  tmp
 }
 
 predict_next <- function(bs, context, max_level = -1, alphabet = NULL){

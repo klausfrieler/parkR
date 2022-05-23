@@ -21,61 +21,54 @@ get_triad_type <- function(chord_type){
 #'
 #' @return
 #' @export
-#'
-#' @examples
 get_scale_degree_code <- function(chord_label, key, as_df = FALSE){
     #browser()
   if(length(chord_label) > 1){
-    if(as_df){
-      ret <- map_dfr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = T))
-    }
-    else{
-      ret <- map_chr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = F))
-    }
+    ret <- map_chr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = as_df))
     return(ret)
-    }
+  }
 
-    key_letter <- str_split_fixed(key, "-", 2)[,1] %>% as.vector()
-    key_pc <- str_split_fixed(key, "-", 2)[,1] %>% tone_name_to_pc() %>% as.vector()
-    mode <- str_split_fixed(key, "-", 2)[,2] %>% as.vector()
+  key_letter <- str_split_fixed(key, "-", 2)[,1] %>% as.vector()
+  key_pc <- str_split_fixed(key, "-", 2)[,1] %>% tone_name_to_pc() %>% as.vector()
+  mode <- str_split_fixed(key, "-", 2)[,2] %>% as.vector()
 
-    if(is.character(chord_label)){
-      chord <- parse_chord(chord_label)
+  if(is.character(chord_label)){
+    chord <- parse_chord(chord_label)
+  }
+  else{
+    chord <- chord_label
+  }
+  ctype <- chord$type[1]
+  pc_rel = (chord$pc[1] - key_pc) %% 12
+  triad_type <- get_triad_type(ctype)
+  scale_degree <- scale_degrees[["norm"]][pc_rel+1]
+  if(triad_type == "min"){
+    scale_degree <- tolower(scale_degree)
+  }
+  if(ctype == "m7b5"){
+    scale_degree <- sprintf("%sm7b5", tolower(scale_degree))
+
+  }
+  else {
+    if(str_detect(ctype, "7")){
+      scale_degree <- sprintf("%s%s", scale_degree, ctype)
+      scale_degree <- str_remove(scale_degree, "min")
+      scale_degree <- str_remove(scale_degree, "ma")
     }
     else{
-      chord <- chord_label
-    }
-    ctype <- chord$type[1]
-    pc_rel = (chord$pc[1] - key_pc) %% 12
-    triad_type <- get_triad_type(ctype)
-    scale_degree <- scale_degrees[["norm"]][pc_rel+1]
-    if(triad_type == "min"){
-      scale_degree <- tolower(scale_degree)
-    }
-    if(ctype == "m7b5"){
-      scale_degree <- sprintf("%sm7b5", tolower(scale_degree))
+      if(triad_type == "o"){
+        scale_degree <- tolower(scale_degree)
+        scale_degree <- sprintf("%so", scale_degree)
+      }
 
     }
-    else {
-      if(str_detect(ctype, "7")){
-        scale_degree <- sprintf("%s%s", scale_degree, ctype)
-        scale_degree <- str_remove(scale_degree, "min")
-        scale_degree <- str_remove(scale_degree, "ma")
-      }
-      else{
-        if(triad_type == "o"){
-          scale_degree <- tolower(scale_degree)
-          scale_degree <- sprintf("%so", scale_degree)
-        }
-
-      }
-    }
-    if(as_df){
-      tibble(tonic = key_letter, scale_degree = scale_degree)
-    }
-    else{
-      sprintf("%s: %s", key_letter, scale_degree)
-    }
+  }
+  if(as_df){
+    tibble(tonic = key_letter, scale_degree = scale_degree)
+  }
+  else{
+    sprintf("%s: %s", key_letter, scale_degree)
+  }
 }
 
 add_key <- function(keys, mode, chord, offset = 0){
