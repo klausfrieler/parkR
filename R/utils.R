@@ -8,11 +8,13 @@ safe_seq <- function(x, y, step = 1){
   ret[ret > 0]
 }
 
+#' @export
 set_format <- function(obj, format = ""){
   attr(obj, "format") <- format
   return(obj)
 }
 
+#' @export
 get_format <- function(obj){
   attr(obj, "format")
 }
