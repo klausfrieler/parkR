@@ -533,3 +533,94 @@ durclass_hist <- function(data,
   q <- q + scale_x_discrete(name = "Duration classes", drop = FALSE, labels = labels$durclass_labels)
   q
 }
+
+#' Needle pLot for a range of z-transformed variables
+#'
+#' @param data (data frame) A data frame in long format, with a column "name" that contains the variable names to compare
+#'for, and a column "value", that contains z-transformed values.
+#' @param facet_var (string) Name of column containing a factor variable for facetting (default is NULL, i.e., no facets)
+#' @param max_z (numeric) Max z-value to consider
+#' @param point_size (numeric) size of the "needle heads"
+#'
+#' @return A ggplot object
+#' @export
+plot_z_values <- function(data, facet_var = NULL, max_z = 4, point_size = 3, base_size = NULL, sort_by_value = F){
+  #data <- merge(data, sof, by = "id")
+  if(length(setdiff(c("value", "name"), names(data))) != 0){
+    stop("Data has to contain a 'value' and 'name' column")
+  }
+  data$value_groups <- factor(floor(abs(data$value) ))
+  if(sort_by_value){
+    data$name <- fct_reorder(data$name, data$value, function(.x) median(.x))
+  }
+  else{
+    data$name <- factor(data$name, levels = rev(unique(data$name)))
+
+  }
+  #print(names(data))
+  q <- data %>% ggplot(aes(x = name, y = value))
+  q <- q + geom_point(size = point_size, aes(colour = value_groups))
+  q <- q + geom_segment(aes(x = name, xend = name, y = 0, yend = value))
+  q <- q + scale_y_continuous(limits = c(- max_z - .5, max_z + .5), breaks = seq(-max_z, max_z))
+  q <- q + coord_flip()
+
+  if(!is.null(facet_var) && facet_var %in% names(data)){
+    q <- q + facet_wrap(facet_var)
+  }
+  q  <- q + theme_bw(base_size = base_size) +
+    theme(legend.background = element_blank(),
+          legend.key = element_blank(),
+          panel.background = element_blank(),
+          panel.border = element_blank(),
+          strip.background = element_blank(),
+          plot.background = element_blank(),
+          axis.line = element_blank(),
+          panel.grid = element_blank())
+  q <- q + scale_color_manual(values = c("#7CAE00", "#F8766D", "#00BFC4", "#C77CFF", "#619CFF", "#F564E3"))
+  q <- q + theme(axis.ticks = element_blank())
+  q <- q + guides(colour = "none")
+  q <- q + labs(x = "",  y = "z-value")
+  q <- q + geom_hline(yintercept = 0, linetype = "dotted")
+  q <- q + geom_hline(yintercept = 1) + geom_hline(yintercept = -1)
+  if(max_z >= 2){
+    q <- q + geom_hline(yintercept = 2, linetype = "dotted")  + geom_hline(yintercept = -2, linetype = "dotted")
+  }
+  if (max_z > 3){
+    q <- q + geom_hline(yintercept = 3) + geom_hline(yintercept = -3)
+  }
+  if (max_z >= 4){
+    q <- q + geom_hline(yintercept = 4, linetype = "dotted") + geom_hline(yintercept = -4, linetype = "dotted")
+  }
+  q
+}
+
+#' Generate z-Plots for a sunbset of the Weimar Jazz Database (or another dataset)
+#'
+#' @param feature_frame (data.frame) A data.frame containing the variables as defined in features, as well as group_selector, and, if requested, facet_var
+#' @param group_selector (boolean) Marks the subgroup to display
+#' @param features (vector of strings) List of feature variables (need to be contained in feature_frame)
+#' @param facet_var (string) Variable name for facetting
+#' @param ... Extra arguments, passed to plot_z_values
+#'
+#' @return
+#' @export
+#'
+#' @examples
+wjd_subgroup_z_plot <- function(feature_frame = jazzpdata::wjd_features_hardcore,
+                                group_selector,
+                                features = jazzodata::hardcore_features,
+                                facet_var = NULL,
+                                ...){
+  all_vars <- c(group_selector, features, facet_var)
+  if(length(setdiff(all_vars, names(feature_frame))) != 0){
+    stop(sprintf("One or more variables not contained in feature frame: ",
+                 paste(setdiff(all_vars, names(feature_frame)), collapse = ", ")))
+  }
+
+  tmp <- feature_frame %>%
+    select(id, all_of(all_vars)) %>%
+    mutate(across(where(is.numeric), clean_scale)) %>%
+    pivot_longer(-c(id, !!sym(group_selector), !!sym(facet_var))) %>%
+    filter(!!sym(group_selector))
+  plot_z_values(tmp, facet_var = facet_var, ...)
+}

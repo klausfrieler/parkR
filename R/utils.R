@@ -1,11 +1,17 @@
+#' @export
 safe_seq <- function(x, y, step = 1){
   if(x > y){
-    ret <- seq(x, y, -1*step)
+    ret <- seq(x, y, -1 * step)
   }
   if(x < y){
     ret <- seq(x, y, step)
   }
   ret[ret > 0]
+}
+
+#' @export
+clean_scale <- function(x, ...){
+  as.vector(scale(x, ...))
 }
 
 #' @export
