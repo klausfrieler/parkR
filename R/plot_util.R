@@ -10,78 +10,19 @@ jazzomat_red <- "indianred3"
 jazzomat_gold <-"lightgoldenrod4"
 jazzomat_blue <-"aquamarine4"
 
-jazzomat_palette  <- list(
-  set1 = c(default_color, default_color2, default_color3, default_color4),
-  set2 = c(default_color, default_color2, default_color2, default_color),
-  set3 = c(default_color,jazzomat_red, default_color2, default_color)
-)
 
 default_grid_color <- "gray64"
 
 basic_theme <- "minimal"
 
-labels <- list(
-  cpc_labels = c("1", "b9", "9", "b3", "3", "11", "#11/b5", "5", "b13", "13", "7", "j7", "NA"),
-  durclass_labels = c("Very Short", "Short", "Medium", "Long", "Very Long"),
-  fuzzy_labels = c("Large Jump Down", "Jump Down","Leap Down","Step Down","Repetition","Step Up","Leap Up","Jump Up","Large Jump Up"),
-  pc_labels = c("C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "Bb", "B"),
-  pc_labels_sharp = c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"),
-  pc_labels_flat = c("C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"),
-  metric_pos_4_4 = c("1", "", "", "", "", "", "1+", "", "", "", "", "", "2", "", "", "", "", "", "2+", "", "", "", "", "",  "3", "", "", "", "", "", "3+", "", "", "", "", "", "4", "", "", "", "", "","4+", "", "", "", "", "" ),
-  main_idea = c("rhythm","lick","lick","line","melody","lick","lick","rhythm","line","line","line","line","line","line","line","line","line","line","rhythm","line","line","melody","line","line","line","melody","line","fragment","line","line","expressive","melody","expressive","line","line","lick","rhythm","rhythm","line","line","line","rhythm","rhythm","rhythm","rhythm","line","line","expressive","line","line","line","expressive","expressive","melody","line","expressive"),
-  sub_ideas = c("rhythm-single-irregular","lick","lick","line-wavy-ascending","melody","lick","lick","rhythm-single-irregular","line-wavy-descending","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-descending","line-wavy-descending","line-tick-slide","rhythm-single-irregular","line-descending","line-wavy-ascending","melody","line-wavy-descending","line-wavy-ascending","line-wavy-concave","melody","line-wavy-convex","fragment","line-wavy-horizontal","line-wavy-ascending","expressive","melody","expressive","line-wavy-descending","line-ascending","lick","rhythm-multi-regular","rhythm-multi-regular","line-wavy-ascending","line-descending","line-wavy-descending","rhythm-multi-regular","rhythm-multi-regular","rhythm-multi-regular","rhythm-multi-regular","line-wavy-descending","line-wavy-ascending","expressive","line-wavy-horizontal","line-wavy-descending","line-wavy-ascending","expressive","expressive","melody","line-wavy-horizontal","expressive"),
-  parsons_labels = c("Down", "Repeat", "Up"),
-  cdpc_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10"),
-  cdpcx_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10", "b9", "b13"),
-  contour_labels =  c("Ascending", "Ascending-Horizontal", "Concave", "Convex", "Descending", "Descending-Horizontal", "Horizontal", "Horizontal-Ascending", "Horizontal-Descending"),
-  redcontour_labels =  c("Ascending", "Descending",  "Convex", "Concave",  "Horizontal")
-
-)
-
-make_octave <- function(n){
-  c(sprintf("C%s", as.character(n)), rep("", 11))
-}
-
-MIDI_labels <- NULL
-MIDI_reduced_labels <- NULL
-for (i in -1:10){
-  MIDI_labels <- c(MIDI_labels, make_octave(i))
-  MIDI_reduced_labels <- c(MIDI_reduced_labels, make_octave(i))
-}
-MIDI_labels[8 + 0:11 * 12] <- paste("G", -1:10, sep="")
-MIDI_labels[3 + 0:11 * 12] <- paste("D", -1:10, sep="")
-MIDI_labels[5 + 0:11 * 12] <- paste("E", -1:10, sep="")
-MIDI_labels[6 + 0:11 * 12] <- paste("F", -1:10, sep="")
-MIDI_labels[10 + 0:11 * 12] <- paste("A", -1:10, sep="")
-MIDI_labels[12 + 0:11 * 12] <- paste("B", -1:10, sep="")
-
-MIDI_full <- MIDI_labels
-MIDI_full[9 + 0:11*12] <- paste("Ab", -1:10, sep="")
-MIDI_full[2 + 0:11*12] <- paste("Db", -1:10, sep="")
-MIDI_full[4 + 0:11*12] <- paste("Eb", -1:10, sep="")
-MIDI_full[7 + 0:11*12] <- paste("Gb", -1:10, sep="")
-MIDI_full[11 + 0:11*12] <- paste("Bb", -1:10, sep="")
-#MIDI_full[12 + 0:11*12]<-paste("B", -1:10, sep="")
-
-MIDI_reduced_labels[8 + 0:11*12] <- paste("G", -1:10, sep="")
-MIDI_full <- MIDI_full[2:length(MIDI_full)]
-MIDI_reduced_labels <- MIDI_reduced_labels[2:length(MIDI_reduced_labels)]
-
-# names(MIDI_labels) <- (1:length(MIDI_labels))
-# names(MIDI_reduced_labels) <- (1:length(MIDI_reduced_labels))
-labels[["MIDI_note_names"]] <- MIDI_full
-labels[["MIDI_note_names_reduced"]] <- MIDI_reduced_labels
-
-usethis::use_data(labels, overwrite = T)
-usethis::use_data(jazzomat_palette, overwrite = T)
 
 #' nice_cdpcx
-#' Makes a nice (sorted, labeled) cdpcx factor
-#' @param cdpcx_factor
+#' Makes a nice (sorted, labelled) CDPCX factor
+#' @param cdpcx_values A vector of CDPCX values
 #'
-#' @return factor of vector
+#' @return vector of CDPCX labels (factor)
 #' @export
-nice_cdpcx <- function(cdpcx_factor){
+nice_cdpcx <- function(cdpcx_values){
   #Order and re-label raw CDPCX values for display
   cdpcx_factor <- factor(cdpcx_factor,
                          levels = c("1", "2", "3", "4", "5", "6", "7", "B", "L", "T", "<", ">", "-", "%"),
@@ -420,7 +361,7 @@ pitch_hist <- function(data, id = NULL, reduced_labels = F, percentage = T, fill
 #' @param mcm48_col (string) column name where MCM 48 data is stored, defaults to "mcm_48"
 #' @param x_labels (string vector) Labels for x axis, defaults to 4/4 labels
 #'
-#' @return
+#' @return gg2plot object
 #' @export
 mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col = "mcm_48", x_labels = labels[["metric_pos_4_4"]]){
   tmp <- select_by_id(data, id)
@@ -602,10 +543,8 @@ plot_z_values <- function(data, facet_var = NULL, max_z = 4, point_size = 3, bas
 #' @param facet_var (string) Variable name for facetting
 #' @param ... Extra arguments, passed to plot_z_values
 #'
-#' @return
+#' @return gg2plot object
 #' @export
-#'
-#' @examples
 wjd_subgroup_z_plot <- function(feature_frame = jazzpdata::wjd_features_hardcore,
                                 group_selector,
                                 features = jazzodata::hardcore_features,

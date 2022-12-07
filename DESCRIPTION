@@ -30,8 +30,10 @@ Imports:
     httr,
     jsonlite,
     furrr,
-    future
+    future,
+    usethis
 Suggests:
-    jazzodata,
     devtools (>= 1.13.6)
-RoxygenNote: 7.1.1
+Remotes:
+    github/klausfrieler/jazzodata
+RoxygenNote: 7.2.0

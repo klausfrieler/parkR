@@ -27,7 +27,7 @@ mcm_hist(
 \item{x_labels}{(string vector) Labels for x axis, defaults to 4/4 labels}
 }
 \value{
-
+gg2plot object
 }
 \description{
 Plots a fancy Metrical Circle Map (N = 48)  plot

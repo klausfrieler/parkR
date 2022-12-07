@@ -159,7 +159,7 @@ DTL_similarity_search_results_fast <- function(search_patterns = "1,2,1,2,1,2,1,
     max_edit_distance <- map_int(value_to_vec(search_patterns), length) %>% min()
   }
   future::plan(multisession)
-  results <- furrr:::future_map_dfr(search_patterns, function(pattern){
+  results <- furrr::future_map_dfr(search_patterns, function(pattern){
     search_id <- DTL_similarity_search(pattern,
                                        transformation,
                                        database_names,

@@ -2,14 +2,14 @@
 
 #' printf
 #' Combines sprintf and print
-#' @param ...
+#' @param ... Arguments to be passed to message()
 #'
 #' @export
 printf <- function(...) print(sprintf(...))
 
 #' messagef
 #' Combines sprintf and message
-#' @param ...
+#' @param ... Arguments to be passed to message()
 #'
 #' @export
 messagef <- function(...) if(parkR::parkr_options()$debug) message(sprintf(...))

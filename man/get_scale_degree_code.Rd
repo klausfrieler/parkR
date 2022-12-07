@@ -14,7 +14,7 @@ get_scale_degree_code(chord_label, key, as_df = FALSE)
 \item{as_df}{(boolean) flag whether to return a data.frame or string vector}
 }
 \value{
-
+Either a vector of strings or a tibble object
 }
 \description{
 get_scale_degree_code
