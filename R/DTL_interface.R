@@ -39,17 +39,17 @@ DTL_similarity_search <- function(search_pattern = "1,2,1,2,1,2,1,2",
                                  max_length_difference = max_length_difference, filter_category = 0),
                encode = "form"))
   #browser()
-  #print(content(resp, "text"))
+  #print(httr::content(resp, "text"))
   if (httr::http_error(resp)) {
       messagef(
         "[DTL API]  Similarity Search  request failed [%s]\n%s\n<%s>",
-        status_code(resp),
+        httr::status_code(resp),
         "",#parsed$message,
         ""#parsed$documentation_url
         )
     return(NULL)
   }
-  parsed <- jsonlite::fromJSON(content(resp, "text"), simplifyVector = FALSE)
+  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
   messagef("[DTL API] Retrieved search ID %s of for pattern %s", parsed$search_id, search_pattern)
   parsed$search_id
 }
@@ -61,16 +61,16 @@ DTL_get_results <- function(search_id){
   if (http_error(resp)) {
       messagef(
         "[DTL API]  Similarity Search  request failed [%s]\n%s\n<%s>",
-        status_code(resp),
+        httr::status_code(resp),
         "",#parsed$message,
         ""#parsed$documentation_url
       )
     return(NULL)
   }
-  #print(content(resp, "text"))
+  #print(httr::content(resp, "text"))
   #browser()
 
-  parsed <- jsonlite::fromJSON(content(resp, "text"), simplifyVector = FALSE)
+  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
   messagef("[DTL API] Retrieved %s lines for search_id %s", length(parsed), search_id)
   map_dfr(parsed, function(x){
     if(is.null(x$within_single_phrase)){

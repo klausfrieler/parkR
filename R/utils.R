@@ -10,6 +10,14 @@ safe_seq <- function(x, y, step = 1){
 }
 
 #' @export
+to_percent <- function(x, digits = 1) round(100 * x, digits)
+
+#' @export
+to_percent_str <- function(x, digits = 1) {
+  format_str <- sprintf("%%.%df%%%%", digits)
+  sprintf(format_str, round(100 * x, digits))
+}
+#' @export
 clean_scale <- function(x, ...){
   as.vector(scale(x, ...))
 }
@@ -64,6 +72,9 @@ select_by_id <- function(df, id = NULL, id_var = "id"){
 pull_unique <- function(df, var){
   df %>% pull(!!enquo(var)) %>% unique()
 }
+
+#' @export
+punq <- function(df, var) pull_unique(df, var)
 
 #' @export
 signed_modulo <- Vectorize(function(x, n){
@@ -273,3 +284,57 @@ classify_int_pattern <- function(pattern){
   tibble(main_type =  "cool", sub_type = "other")
 }
 
+#' export
+get_ngrams_from_vector <- function(x, N, idx = NULL, ids = NULL, sep = ",", format = c("vector", "unique", "tibble")){
+  format = match.arg(format)
+  l <- length(x)
+  if(is.null(idx)){
+    idx <- 1:l
+  }
+  idx <- idx[idx > 0]
+  N <- as.integer(N)
+  idx <- as.integer(idx)
+  N <- N[N > 0 && N < l]
+  if(length(N) > 1){
+    if(format == "tibble"){
+      ret <- map_dfr(N, ~{ get_ngrams_from_vector(x, .x, idx, ids, sep, format)})
+    }
+    else{
+      ret <- map(N, ~{ get_ngrams_from_vector(x, N = .x, idx, ids, sep, format)})
+    }
+    return(ret)
+  }
+  idx <- idx[(idx +  N -1) <= l]
+
+  if(length(idx) == 0){
+    if(format == "tibble"){
+      return(tibble())
+      }
+      else{
+        return(character(0))
+      }
+  }
+  #printf("Getting %d-grams for %s", N, paste0(idx, collapse = ","))
+  tmp <-
+    purrr::map_chr(idx, function(i){
+      if(i + N - 1 > l){
+        return(paste0(x[i:l],  collapse =  sep))
+      }
+      paste0(x[i:(i + N - 1)],  collapse =  sep)
+    })
+  #browser()
+  if(format == "vector"){
+    tmp[nzchar(tmp)]
+  }
+  else if(format == "unique"){
+    unique(tmp[nzchar(tmp)])
+  }
+  else{
+    if(!is.null(ids)){
+      tibble(pos = idx, value = tmp, N = N, id = ids[idx]) %>% filter(nzchar(tmp))
+    }
+    else{
+      tibble(pos = idx, value = tmp, N = N) %>% filter(nzchar(tmp))
+    }
+  }
+}

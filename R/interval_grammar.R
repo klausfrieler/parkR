@@ -43,6 +43,7 @@ value_to_vec <- function(value_str, type = c("integer", "character"), collapse =
 # column_to_table   <- function(tbf, col_name) table(tbf[[col_name]])
 # column_to_prop_table <- function(tbf, col_name) round(prop.table(table(tbf[[col_name]])) * 100, 1)
 
+
 #words <- c("Diatonic Scales"="D", "Arpeggios"="A", "Figurations"="F", "L"="Link")
 # long_names <- c("D" = "Diatonic (D)",
 #                 "C" = "Chromatic (C)",
@@ -684,34 +685,49 @@ resolve_row_pair <- function(data, row_index){
   type2 <- data[row_index + 1,]$type
   dir1 <- data[row_index,]$direction
   dir2 <- data[row_index + 1,]$direction
+  cuts <- 0
   if(type1 == "F" && (type2 == "C" || type2 == "D" || type2 == "X" )){
     data <- cut_row(data, row_index, type = "right")
+    cuts <- cuts + 1
   }
   #if(type1 == "F" && (type2 == "C" || type2 == "D" || type2 == "X" )){
   #  data <- cut_row(data, row_index, type = "right")
   #}
   if(type1 == "F" && (type2 == "T" || type2 == "F")){
     data <- cut_row(data, row_index + 1, type = "left")
+    cuts <- cuts + 1
   }
-  if(type1 == "J" && (type2 == "A" || type2 == "F")){
+  if(type1 == "J" && (type2 == "A" || type2 == "F" || type2 == "T")){
     data <- cut_row(data, row_index, type = "right")
+    cuts <- cuts + 1
   }
   if(type2 == "J" && (type1 == "A" || type1 == "F")){
     data <- cut_row(data, row_index + 1, type = "left")
+    cuts <- cuts + 1
   }
   if(type1 == "F" && type2 == "A"){
     data <- cut_row(data, row_index, type = "right")
+    cuts <- cuts + 1
   }
-  if(type1 == "A" && type2 == "F"){
+
+  if(type1 == "A" && (type2 == "F" || type2 == "T")){
     data <- cut_row(data, row_index + 1, type = "left")
+    cuts <- cuts + 1
   }
   if((type1 == "D" || type1 == "C") && (type2 == "T" || type2 == "F")){
     data <- cut_row(data, row_index + 1, type = "left")
+    cuts <- cuts + 1
   }
-  if(type1 == "T" && (type2 == "C" || type2 == "D" || type2 == "F" || type2 == "X") ){
+  if(type1 == "T" && (type2 == "C" || type2 == "D" || type2 == "F" || type2 == "X" || type2 == "J") ){
     data <- cut_row(data, row_index, type = "right")
+    cuts <- cuts + 1
   }
   if(type1 == "X"){
+    data <- cut_row(data, row_index, type = "right")
+    cuts <- cuts + 1
+  }
+  if(cuts == 0){
+    messagef("[parkR::resolve_row_pairs] Unhandled cut case for type1 = %s, type2 = %s, using default", type1, type2)
     data <- cut_row(data, row_index, type = "right")
   }
   data %>% add_overlaps()
@@ -721,15 +737,18 @@ find_doubles <- function(vec){
   which(vec == lead(vec, 1))
 }
 
-resolve_overlaps <- function(data, debug = F){
+resolve_overlaps <- function(data, debug = T){
   #browser()
   overs <- show_overlaps(data)
   if(length(overs) == 0){
     return(data)
   }
   i <- 0
-  #print(overs)
-  limit <- ifelse(debug, 1, 10) + length(overs)
+  #limit <- ifelse(debug, 1, 10) + length(overs)
+  #print(limit)
+  limit <- ifelse(debug, 1, 10) + sum(data[overs,]$length)
+  #print(limit)
+
   while(length(overs) > 0){
     i <- i + 1
     if(i > limit) {

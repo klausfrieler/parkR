@@ -404,7 +404,7 @@ single_key_analysis <- function(chord_stream, fuse_length = 3){
 #' into local keys and corresponding
 #' local scale degree annotations (using Roman numerals)
 #'
-#' @param lead_sheet (data frame of class lead sheer) A lead sheet data frame or NULL, if NULL \code{chord_stream} is used
+#' @param lead_sheet (data frame) A lead sheet data frame or NULL, if NULL \code{chord_stream} is used
 #' @param chord_stream (character string of chord symbols) A sequence of chords or NULL, if NULL \code{lead_sheet} is used, if both are NULL then an error is issued
 #' @param remove_reps (logical scalar) Flag if repeated chords shall removed (default is \code{TRUE}). Currently disabled.
 #' @param add_metadata (logical scalar) Flag if (lead sheet) metadata (lead sheet info, analysis stats, key stats, estimated overall key) shall be added to result as attributes (default is \code{TRUE}).
@@ -490,7 +490,7 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T
     attr(pass, "metadata") <- lead_sheet %>% distinct(compid, title, composer)
   }
   class(pass) <- c(oldClass(pass), "key_analysis")
-  browser()
+  #browser()
   return(pass)
 }
 

@@ -606,7 +606,7 @@ plot_z_values <- function(data, facet_var = NULL, max_z = 4, point_size = 3, bas
 #' @export
 #'
 #' @examples
-wjd_subgroup_z_plot <- function(feature_frame = jazzpdata::wjd_features_hardcore,
+wjd_subgroup_z_plot <- function(feature_frame = jazzodata::wjd_features_hardcore,
                                 group_selector,
                                 features = jazzodata::hardcore_features,
                                 facet_var = NULL,

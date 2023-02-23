@@ -112,6 +112,8 @@ get_ngrams <- function(bi_enc = NULL, pos = NULL, level, bigram_stack = bbh, ori
 cover_seq <- function(bigram_stack, bi_enc, level, with_overlap = F){
   tictoc::tic()
   bigram_ids <- sprintf("%s-%s", bi_enc, level) %>% unique()
+  min_pos <- min(bigram_stack$pos) - 1
+  max_pos <- max(bigram_stack$pos)
   #bigram_stack <- bigram_stack %>% mutate(bigram_id = sprintf("%s-%s", bi_enc, level))
   #browser()
   positions <- bigram_stack %>%
@@ -120,10 +122,12 @@ cover_seq <- function(bigram_stack, bi_enc, level, with_overlap = F){
     arrange(desc(level), pos)
 
   if(nrow(positions) == 0){
-    return(NULL)
+    tmp <- tibble(pos = (1 + min_pos):max_pos,
+                  covered = FALSE,
+                  cover_ids =  "")
+    bigram_stack %>% left_join(tmp, by = "pos")
+    return(bigram_stack %>% left_join(tmp, by = "pos"))
   }
-  min_pos <- min(bigram_stack$pos) - 1
-  max_pos <- max(bigram_stack$pos)
   covered <- rep(FALSE, max_pos - min_pos)
   cover_bigrams <- rep("", max_pos - min_pos)
   messagef("Covering with %d bigrams on %d positions (%d positions in total)", n_distinct(bigram_ids), max(bigram_stack$pos), nrow(positions))
@@ -509,7 +513,10 @@ get_last_element_from_value <- function(value){
 get_value_context <- function(bs, value, pre = 0, post = 0, only_values = F){
   pre <- max(0, pre)
   post = max(0, post)
-  tmp <- bs %>% filter(value == {{value}})
+  tmp <- bs %>% filter(value == !!value)
+  if(nrow(tmp) == nrow(bs)){
+    browser()
+  }
   if(nrow(tmp) == 0){
     if(only_values){
       return(character(0))
