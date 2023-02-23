@@ -2,7 +2,7 @@
 % Please edit documentation in R/simile.R
 \name{opti3}
 \alias{opti3}
-\title{export}
+\title{Famous opti3 measure according to Müllensiefen & Frieler (2004)}
 \usage{
 opti3(
   pitch_vec1,
@@ -15,5 +15,5 @@ opti3(
 )
 }
 \description{
-export
+Famous opti3 measure according to Müllensiefen & Frieler (2004)
 }

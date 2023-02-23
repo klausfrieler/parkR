@@ -15,8 +15,7 @@ printf <- function(...) print(sprintf(...))
 messagef <- function(...) if(parkR::parkr_options()$debug) message(sprintf(...))
 
 
-#' @export
-value_to_vec <- function(value_str, type = c("integer", "character"), collapse = ""){
+value_to_vec2 <- function(value_str, type = c("integer", "character"), collapse = ""){
   type <- match.arg(type)
   vec <- gsub("\\[", "", as.character(value_str))
   vec <- gsub("\\]", "", vec)
@@ -37,6 +36,29 @@ value_to_vec <- function(value_str, type = c("integer", "character"), collapse =
     }
   }
   ret
+}
+
+#' @export
+value_to_vec <- function(value_str, type = c("integer", "character", "double"), collapse = "", simplify = T){
+  type <- match.arg(type)
+  if(type == "integer"){
+    ret <- str_extract_all(value_str, "[0-9]+") %>% lapply(as.integer)
+    if(length(value_str) == 1  && simplify){
+      ret <- ret[[1]]
+    }
+    return(ret)
+  }
+  else if(type == "double"){
+    ret <- str_extract_all(value_str, "[0-9\\.]+") %>% lapply(as.numeric)
+    if(length(value_str) == 1 && simplify){
+      ret <- ret[[1]]
+    }
+    return(ret)
+  }
+  else{
+    return(str_remove_all(value_str, "[\\[\\]\\{\\}\\(\\)]") %>% str_replace_all("[,]+", collapse))
+
+  }
 }
 
 # column_to_vector <- function(tbf, col_name) tbf[[col_name]]
