@@ -24,7 +24,7 @@ wjd_subgroup_z_plot(
 \item{...}{Extra arguments, passed to plot_z_values}
 }
 \value{
-
+gg2plot object
 }
 \description{
 Generate z-Plots for a sunbset of the Weimar Jazz Database (or another dataset)

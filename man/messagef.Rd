@@ -8,7 +8,7 @@ Combines sprintf and message}
 messagef(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{Arguments to be passed to message()}
 }
 \description{
 messagef

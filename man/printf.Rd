@@ -8,7 +8,7 @@ Combines sprintf and print}
 printf(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{Arguments to be passed to message()}
 }
 \description{
 printf

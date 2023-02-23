@@ -19,7 +19,7 @@ get_triad_type <- function(chord_type){
 #' @param key (string) valid key symbol
 #' @param as_df (boolean) flag whether to return a data.frame or string vector
 #'
-#' @return
+#' @return Either a vector of strings or a tibble object
 #' @export
 get_scale_degree_code <- function(chord_label, key, as_df = FALSE){
     #browser()

@@ -3,17 +3,17 @@
 \name{nice_cdpcx}
 \alias{nice_cdpcx}
 \title{nice_cdpcx
-Makes a nice (sorted, labeled) cdpcx factor}
+Makes a nice (sorted, labelled) CDPCX factor}
 \usage{
-nice_cdpcx(cdpcx_factor)
+nice_cdpcx(cdpcx_values)
 }
 \arguments{
-\item{cdpcx_factor}{}
+\item{cdpcx_values}{A vector of CDPCX values}
 }
 \value{
-factor of vector
+vector of CDPCX labels (factor)
 }
 \description{
 nice_cdpcx
-Makes a nice (sorted, labeled) cdpcx factor
+Makes a nice (sorted, labelled) CDPCX factor
 }

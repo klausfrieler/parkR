@@ -12,7 +12,7 @@ key_analysis(
 )
 }
 \arguments{
-\item{lead_sheet}{(data frame of class lead sheer) A lead sheet data frame or NULL, if NULL \code{chord_stream} is used}
+\item{lead_sheet}{(data frame) A lead sheet data frame or NULL, if NULL \code{chord_stream} is used}
 
 \item{chord_stream}{(character string of chord symbols) A sequence of chords or NULL, if NULL \code{lead_sheet} is used, if both are NULL then an error is issued}
 
