@@ -634,7 +634,7 @@ test_predictions <- function(bs, window_size= 5, num_windows = 10, offset = 0, m
     if(i + offset + window_size - 1 > length(seq)){
       return(NULL)
     }
-    browser()
+    #browser()
     snip <- seq[(i + offset):(i + offset + window_size-1)]
     predictions <-  suppressWarnings(
       predict_next(bs, snip, max_level = max_order, alphabet = alphabet)

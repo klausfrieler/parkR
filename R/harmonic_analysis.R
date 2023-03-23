@@ -22,7 +22,7 @@ get_triad_type <- function(chord_type){
 #' @return Either a vector of strings or a tibble object
 #' @export
 get_scale_degree_code <- function(chord_label, key, as_df = FALSE){
-    #browser()
+  #browser()
   if(length(chord_label) > 1){
     ret <- map_chr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = as_df))
     return(ret)
@@ -81,7 +81,7 @@ add_key <- function(keys, mode, chord, offset = 0){
     key <- sprintf("%s-%s", chord$root[1], mode)
   }
   else{
-    key <- sprintf("%s-%s", labels$pc_labels_flat[((chord$pc[1]  + offset) %% 12)  + 1], mode)
+    key <- sprintf("%s-%s", parkR::labels$pc_labels_flat[((chord$pc[1]  + offset) %% 12)  + 1], mode)
   }
   c(keys, key)
 }
@@ -149,7 +149,7 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
     keys <- add_key(keys, "X", chord, offset = -1)
     keys <- add_key(keys, "blues", chord, offset = 0)
     keys <- add_key(keys, "blues", chord, offset = -5)
-    keys <- add_key(keys, "maj", chord, offset = 1)
+    #keys <- add_key(keys, "maj", chord, offset = 1)
   }
   if(ctype == "6"){
     keys <- add_key(keys, "maj", chord)#I6
@@ -200,6 +200,7 @@ fuse_tonics2 <- function(chord_candidates){
   chord_pos <- unique(chord_candidates$chord_pos)
   max_pos <- max(chord_pos)
   map_dfr(min(chord_pos):max_pos, function(cn){
+    #browser()
     cand1 <- chord_candidates %>% filter(chord_pos == cn)  %>% pull(key)
     if(cn == max_pos-1){
       cand2 <- chord_candidates %>% filter(chord_pos == (cn + 1)) %>% pull(key)
@@ -322,7 +323,7 @@ split_key_analysis_by_unique <- function(key_analysis){
   starts <-  c(1, rle(key_analysis$unique)$length) %>% cumsum()
   starts <- starts[1:(length(starts)-1)]
   ends <- rle(key_analysis$unique)$length %>% cumsum()
-  tibble(start = starts, end = ends, len = end-starts)
+  tibble(start = starts, end = ends, len = end - starts)
 }
 
 sanity_check_key_analysis <- function(ka, label  = "", as_bool = F){
@@ -352,6 +353,7 @@ get_reduction_factor <- function(key_analysis){
 }
 
 find_II_V <- function(intrinsic_scale_degrees){
+  #browser()
   isc <- intrinsic_scale_degrees %>% mutate(row_id = 1:nrow(intrinsic_scale_degrees))
   chord_pos <- unique(isc$chord_pos) %>% sort()
   chord_pos <- chord_pos[1:(length(chord_pos)-1)]
@@ -386,6 +388,7 @@ single_key_analysis <- function(chord_stream, fuse_length = 3){
     cs <- chord_stream  %>%
       fuse_tonics()
   }
+  #browser()
   cs %>%
     distinct(.keep_all = T) %>%
     left_join(chord_stream, by = c("key", "chord_pos")) %>%
@@ -415,15 +418,24 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T
   compid <- NA
   single_chord <- F
   #browser()
-  if(!is.null(lead_sheet)){
+  if(!is.null(lead_sheet) & has_format(lead_sheet, "lead_sheet")){
+    if(length(intersect(c("chord","title", "bar", "beat"), names(lead_sheet))) != 4)
+      stop("Invalid lead sheet")
     chord_stream <-  get_intrinsic_scale_degree(lead_sheet %>% pull(chord))
-    title <- unique(lead_sheet$title)
-    compid <- unique(lead_sheet$compid)
+    #title <- unique(lead_sheet$title)
+    #compid <- unique(lead_sheet$compid)
+    if(!has_column(lead_sheet, "compid")){
+      lead_sheet <- lead_sheet %>% mutate(compid = as.integer(factor(title)))
+    }
   }
   else if(is.null(chord_stream)){
-    stop("Must provide either lead sheet or chord stream")
+    stop("You must provide either lead sheet data frame or a chord stream (character vector of chord labels)")
   }
   else{
+    if(!is.character(chord_stream)){
+      stop("You must provide either lead_sheet data frame or a chord_stream character vector of chord labels)")
+
+    }
     single_chord <- length(chord_stream) == 1
     chord_stream <- get_intrinsic_scale_degree(chord_stream)
   }
@@ -432,7 +444,11 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T
     if(nrow(ret) == 0){
       chord_stream[1,]
     }
-    return(ret %>% mutate(chord_pos = 1, unique = T) %>% rename(local_key = key, local_scale_degree = scale_degree))
+    return(ret %>%
+             mutate(chord_pos = 1,
+                    unique = T) %>%
+             rename(local_key = key,
+                    local_scale_degree = scale_degree))
   }
   if(remove_reps){
     #tmp <- rle(chord_stream)
@@ -442,7 +458,7 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T
 
   chord_stream <- chord_stream %>% find_II_V()
   messagef("Before ii-V filter: %d, after: %d", before, nrow(chord_stream))
-  messagef("Analyzing: '%s'[%s]", title, compid)
+  messagef("Analyzing: '%s' [%s]", unique(lead_sheet$title), unique(lead_sheet$compid))
   max_iter <- 5
   pass <- chord_stream
   last_unique_ratio <- 0
@@ -484,13 +500,27 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T
   messagef("Final unique ratio: %.2f after %s iteration", unique_ratio, i )
 
   if(!is.null(lead_sheet) & add_metadata){
+    if(!has_column(lead_sheet, "chord_pos")){
+      lead_sheet <- lead_sheet %>%
+        group_by(compid) %>%
+        mutate(chord_pos = 1:n()) %>%
+        ungroup()
+    }
+    if(!has_column(lead_sheet, "key")){
+      lead_sheet$key <- NA
+    }
+    if(!has_column(lead_sheet, "section")){
+      lead_sheet$section <- NA
+    }
     pass <- pass %>%
-      left_join(lead_sheet %>% rename(main_key = key), by = c("chord_pos", "chord"))  %>%
+      left_join(lead_sheet %>% rename(main_key = key),
+                by = c("chord_pos", "chord"))  %>%
       select(section, bar, beat, chord, main_key, local_key, local_scale_degree)
-    attr(pass, "metadata") <- lead_sheet %>% distinct(compid, title, composer)
+    attr(pass, "metadata") <- lead_sheet %>% distinct(title)
   }
-  class(pass) <- c(oldClass(pass), "key_analysis")
+  #class(pass) <- c(oldClass(pass), "key_analysis")
   #browser()
+  pass <- pass %>% add_format("key_analyis")
   return(pass)
 }
 

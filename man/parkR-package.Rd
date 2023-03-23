@@ -6,7 +6,7 @@
 \alias{parkR-package}
 \title{parkR: Generating monophonic jazz solos for chord sequences and more}
 \description{
-Generates jazz solos using Weimar Bebop Alphabet atoms and midlevel units based on the Weimar Jazz Database.
+Jazz analysis packages based on the Jazzomat proejct at the University of Music Franz Liszt Weimar, including routine to generate jazz solos based on the Weimar Jazz Database.
 }
 \seealso{
 Useful links:

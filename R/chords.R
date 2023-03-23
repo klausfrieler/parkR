@@ -193,8 +193,8 @@ tone_name_to_pc <- Vectorize(function(tone){
   if(tone == "Fb"){
     return(4L)
   }
-  flat_pc <- which(tone ==  labels$pc_labels_flat)
-  sharp_pc <- which(tone ==  labels$pc_labels_sharp)
+  flat_pc <- which(tone ==  parkR::labels$pc_labels_flat)
+  sharp_pc <- which(tone ==  parkR::labels$pc_labels_sharp)
   if(length(flat_pc) != 0){
     pc <- flat_pc - 1
   }
@@ -261,16 +261,20 @@ parse_chord <- function(chord_label){
   if(toupper(chord_label) == "NC"){
     return(tibble(root = NA, type = "NC", pc = NA, bass = NA, bass_pc = NA, ext = ""))
   }
-
+  #browser()
   bass <- strsplit(chord_label, "/")[[1]][2]
   chord_label <- strsplit(chord_label, "/")[[1]][1]
-  chord_label <- gsub("maj7", "XXX", chord_label)
-  chord_label <- gsub("j7", "XXX", chord_label)
-  chord_label <- gsub("XXX", "maj7", chord_label)
-  chord_label <- gsub("-", "min", chord_label)
   chord_label <- gsub("dim7", "o7", chord_label)
   chord_label <- gsub("769", "7913", chord_label)
   chord_label <- gsub("AminD7", "Amin7", chord_label)
+  chord_label <- gsub("maj7", "XXX", chord_label)
+  chord_label <- gsub("j7", "XXX", chord_label)
+  chord_label <- gsub("-", "YYY", chord_label)
+  chord_label <- gsub("min", "YYY", chord_label)
+  chord_label <- gsub("m", "YYY", chord_label)
+  chord_label <- gsub("YYY", "min", chord_label)
+  chord_label <- gsub("XXX", "maj7", chord_label)
+  chord_label <- gsub("min7b5", "m7b5", chord_label)
 
   tmp <- get_extensions(chord_label)
   chord_label <- tmp$chord_label
@@ -509,6 +513,7 @@ get_arpeggio_pitches <- function(chord, min_pitch = 48, max_pitch = 84){
   #scales[[selected]]
   #selected
 }
+
 get_base_arpeggio_pc <- function(chord, n = NULL){
   pitches <- get_arpeggio_pitches(chord) %>% lapply(function(x) x %% 12) %>% unlist() %>% unique()
   if(!is.null(n)){
@@ -556,7 +561,7 @@ unroll_durations <- function(durations){
 #' @param compid (integer or character scalar) If integer, then id of lead sheet in the chord data, if character, than title of song
 #' @param name (character scalar) Currently unused
 #' @param with_form (logical scalar) Flag if form shall be added
-#' @return A leed sheet data frame
+#' @return A lead sheet data frame
 #' @export
 create_leadsheet_from_chord_db <- function(db, compid, name = NULL, with_form = F){
   if(is.character(compid)){
@@ -618,7 +623,7 @@ create_leadsheet_from_chord_db <- function(db, compid, name = NULL, with_form = 
 #' @return A leed sheet data frame
 #' @export
 create_leadsheet_from_irb <- function(compid, name = NULL, with_form = F){
-  create_leadsheet_from_chord_db(parkR::irb, compid, name, with_form)
+  create_leadsheet_from_chord_db(parkR::irb, compid, name) %>% mutate(compid = compid)
 }
 
 #' create_leadsheet_from_wjd_db
@@ -694,6 +699,7 @@ simulate_wjd <- function(ids = 1:456){
     }
     })
 }
+
 parse_wjd_bar <- function(bar_chords, bar_number = 1){
   #print(bar_chords)
   elements <- strsplit(bar_chords, " ")[[1]]

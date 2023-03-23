@@ -10,7 +10,7 @@ mcm_hist(
   percentage = T,
   fill_var = NULL,
   mcm48_col = "mcm_48",
-  x_labels = labels[["metric_pos_4_4"]]
+  x_labels = parkR::labels[["metric_pos_4_4"]]
 )
 }
 \arguments{

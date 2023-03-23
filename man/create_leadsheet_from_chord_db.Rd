@@ -16,7 +16,7 @@ create_leadsheet_from_chord_db(db, compid, name = NULL, with_form = F)
 \item{with_form}{(logical scalar) Flag if form shall be added}
 }
 \value{
-A leed sheet data frame
+A lead sheet data frame
 }
 \description{
 This function generates a lead sheet data from parsed chord data frame (irb or wjd_chord_db),

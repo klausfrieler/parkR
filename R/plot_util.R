@@ -26,7 +26,7 @@ nice_cdpcx <- function(cdpcx_values){
   #Order and re-label raw CDPCX values for display
   cdpcx_factor <- factor(cdpcx_factor,
                          levels = c("1", "2", "3", "4", "5", "6", "7", "B", "L", "T", "<", ">", "-", "%"),
-                         labels = labels$cdpcx_labels
+                         labels = parkR::labels$cdpcx_labels
                          )
   return(cdpcx_factor)
 }
@@ -297,7 +297,7 @@ cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fi
   }
   q <- q + get_default_theme() + theme(legend.position = "none")
   q <- q + scale_x_discrete(name = "Extended chordal diatonic pitch class",
-                            labels = labels[["cdpcx_labels"]],
+                            labels = parkR::labels[["cdpcx_labels"]],
                             drop = FALSE)
   return (q)
 }
@@ -342,10 +342,10 @@ pitch_hist <- function(data, id = NULL, reduced_labels = F, percentage = T, fill
   q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
   q <- q + get_default_theme() + theme(legend.position = "none")
   if(reduced_labels){
-    q <- q + scale_x_discrete(name = "Pitch", drop = FALSE, labels = labels[["MIDI_note_names_reduced"]][min_p:max_p])
+    q <- q + scale_x_discrete(name = "Pitch", drop = FALSE, labels = parkR::labels[["MIDI_note_names_reduced"]][min_p:max_p])
   }
   else{
-    q <- q + scale_x_discrete(name = "Pitch", drop = FALSE, labels = labels[["MIDI_note_names"]][min_p:max_p])
+    q <- q + scale_x_discrete(name = "Pitch", drop = FALSE, labels = parkR::labels[["MIDI_note_names"]][min_p:max_p])
 
   }
   q
@@ -363,7 +363,7 @@ pitch_hist <- function(data, id = NULL, reduced_labels = F, percentage = T, fill
 #'
 #' @return gg2plot object
 #' @export
-mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col = "mcm_48", x_labels = labels[["metric_pos_4_4"]]){
+mcm_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, mcm48_col = "mcm_48", x_labels = parkR::labels[["metric_pos_4_4"]]){
   tmp <- select_by_id(data, id)
   #tmp$full_beats <- factor(tmp$mcm_48 %% 12 == 0, labels=c("Offbeat", "Beat"))
   q <- ggplot(tmp, aes(x = factor(!!sym(mcm48_col), levels = c(0:47))))
@@ -426,7 +426,7 @@ fuzzyint_hist <- function(data, id = NULL, percentage = T,  fill_var = NULL, fuz
   q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
 
   q <- q + get_default_theme(x_rotate = 45) + theme(legend.position = "none")
-  q <- q + scale_x_discrete(name = "Fuzzy Interval", drop = FALSE, labels = labels$fuzzy_labels)
+  q <- q + scale_x_discrete(name = "Fuzzy Interval", drop = FALSE, labels = parkR::labels$fuzzy_labels)
   q
 }
 
@@ -471,7 +471,7 @@ durclass_hist <- function(data,
 
   }
   q <- q + get_default_theme(keep_legend = T)
-  q <- q + scale_x_discrete(name = "Duration classes", drop = FALSE, labels = labels$durclass_labels)
+  q <- q + scale_x_discrete(name = "Duration classes", drop = FALSE, labels = parkR::labels$durclass_labels)
   q
 }
 

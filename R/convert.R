@@ -212,9 +212,9 @@ get_tabr_note <- Vectorize(function(midi_pitch, flat = T){
   if(midi_pitch < 0 ){
     return("r")
   }
-  pc_labels_base <- labels$pc_labels_flat
+  pc_labels_base <- parkR::labels$pc_labels_flat
   if(!flat){
-    pc_labels_base <- labels$pc_labels_sharp
+    pc_labels_base <- parkR::labels$pc_labels_sharp
   }
   pc_labels <- pc_labels_base %>% str_replace("b", "_") %>% tolower()
   note_name <- pc_labels[midi_pitch %%12 + 1]

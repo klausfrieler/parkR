@@ -38,6 +38,17 @@ add_format <- function(obj, format = ""){
   return(obj)
 }
 
+has_column <- function(obj, col){
+  if(!is.character(obj)){
+    return(FALSE)
+  }
+  col %in% names(obj)
+}
+
+has_format <- function(obj, format){
+  format %in% attr(obj, "format")
+}
+
 is_solo_df <- function(obj){
   "solo_df" %in% attr(obj, "format")
 }
@@ -125,6 +136,10 @@ form_from_sections <- function(sections){
 }
 
 form_from_sheet <- function(sheet){
+  if(!has_column(sheet, "section")){
+    warning("No section column in lead sheet ")
+    return(sheet)
+  }
   sheet$section_start <- sheet$section != dplyr::lag(sheet$section)
   sheet$section_start[1] <- TRUE
   start_bars <- sheet[sheet$section_start,]$bar
@@ -284,7 +299,7 @@ classify_int_pattern <- function(pattern){
   tibble(main_type =  "cool", sub_type = "other")
 }
 
-#' export
+#' @export
 get_ngrams_from_vector <- function(x, N, idx = NULL, ids = NULL, sep = ",", format = c("vector", "unique", "tibble")){
   format = match.arg(format)
   l <- length(x)
