@@ -7,7 +7,8 @@
 key_analysis(
   lead_sheet = NULL,
   chord_stream = NULL,
-  remove_reps = T,
+  with_ii_v_filter = T,
+  use_chord_complexity = F,
   add_metadata = T
 )
 }
@@ -16,7 +17,7 @@ key_analysis(
 
 \item{chord_stream}{(character string of chord symbols) A sequence of chords or NULL, if NULL \code{lead_sheet} is used, if both are NULL then an error is issued}
 
-\item{remove_reps}{(logical scalar) Flag if repeated chords shall removed (default is \code{TRUE}). Currently disabled.}
+\item{with_ii_v_filter}{(logical scalar)  Use ii-V detection (default is \code{TRUE}).}
 
 \item{add_metadata}{(logical scalar) Flag if (lead sheet) metadata (lead sheet info, analysis stats, key stats, estimated overall key) shall be added to result as attributes (default is \code{TRUE}).}
 }

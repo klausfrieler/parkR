@@ -1,7 +1,7 @@
 Package: parkR
 Type: Package
 Title: Generating monophonic jazz solos for chord sequences and more
-Version: 0.5.3
+Version: 0.5.4
 Authors@R: c(
   person("Klaus", "Frieler", email = "klaus.frieler@ae.mpg.de", role = c("aut","cre"))
   )
@@ -36,4 +36,4 @@ Suggests:
     devtools (>= 1.13.6)
 Remotes:
     github/klausfrieler/jazzodata
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3

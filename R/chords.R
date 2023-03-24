@@ -125,7 +125,7 @@ chord_definitions[["o"]] <- chord_definitions[["o7"]]
 
 
 chord_types <- c("minmaj7", "maj7", "min7", "min6","minb6", "min", "maj", "m7b5", "o7", "o", "7", "6")
-extensions <- c("add9", "add3", "sus", "b5", "alt", "\\+", "9b", "9#", "9", "11#", "11", "13b", "13" )
+extensions <- c("add9", "add3", "sus4", "sus",  "b5", "alt", "\\+", "9b", "9#", "9", "11#", "11", "13b", "13" )
 triad_types <- c("min", "maj", "min", "min", "min", "min", "maj", "o", "o", "o", "maj", "maj")
 names(triad_types) <- chord_types
 
@@ -569,7 +569,7 @@ create_leadsheet_from_chord_db <- function(db, compid, name = NULL, with_form = 
       select(chord, duration, section, title, time, composer, date, compid, key)
   }
   else {
-    sheet <- db %>% filter(compid == !!compid) %>% select(chord, duration, title, time)
+    sheet <- db %>% filter(compid == !!compid) %>% select(chord, duration, title, time, section, key)
   }
   if(nrow(sheet) == 1){
     return(NULL)

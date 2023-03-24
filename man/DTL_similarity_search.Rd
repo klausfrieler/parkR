@@ -9,8 +9,8 @@ DTL_similarity_search(
   search_pattern = "1,2,1,2,1,2,1,2",
   transformation = c("interval", "pitch", "fuzzyinterval"),
   database_names = "dtl,wjazzd,omnibook",
- 
-    metadata_filters = "{\\"dtl\\": {}, \\"wjazzd\\": {}, \\"esac\\": {}, \\"omnibook\\": {}}",
+  metadata_filters =
+    "{\\"dtl\\": {}, \\"wjazzd\\": {}, \\"esac\\": {}, \\"omnibook\\": {}}",
   filter_category = "0",
   minimum_similarity = 1,
   max_edit_distance = NA,

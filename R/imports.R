@@ -22,7 +22,19 @@ NULL
 #' @import tidyr
 NULL
 
-#' @import tabr
+#' @importFrom tabr as_music
+NULL
+
+#' @importFrom tabr track
+NULL
+
+#' @importFrom tabr score
+NULL
+
+#' @importFrom tabr p
+NULL
+
+#' @importFrom tabr tab
 NULL
 
 #' @importFrom stats chisq.test

@@ -153,10 +153,10 @@ solo_to_lilypond <- function(solo_tbl, file = "solo.pdf", key = "c", tempo = 120
   }
   #browser()
   tabr::as_music(notes = notes, info = tmp$tabr_dur) %>%
-    p() %>%
-    track(tab = F) %>%
-    score(chord_seq = chord_seq)  %>%
-    tab(file = file, key = key, time = "4/4", tempo = sprintf("4 = %s", tempo))
+    tabr::p() %>%
+    tabr::track(tab = F) %>%
+    tabr::score(chord_seq = chord_seq)  %>%
+    tabr::tab(file = file, key = key, time = "4/4", tempo = sprintf("4 = %s", tempo))
 }
 
 ioi_to_tabr_dur <- function(ioi){

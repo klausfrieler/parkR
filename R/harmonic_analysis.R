@@ -1,13 +1,13 @@
 convert_scale_degree <- function(roman_number){
   roman_number <- tolower(roman_number)
-  map(scale_degrees[["nomr"]])
+  map(scale_degrees[["norm"]])
 }
 
 
-scale_degrees <- list("norm" = c("I", "IIb", "II","IIIb", "III", "IV","IV#", "V", "VIb", "VI", "VIIb", "VII"),
-                      "maj" = c("I", "IIb", "ii", "iii", "IV", "IV#", "V", "VIb", "vi", "VIIb", "viio"),
-                      "min" = c("i", "IIb", "iio", "IIIb", "iv", "IV#", "V", "VIb", "vio", "VIIb", "viio"))
-usethis::use_data(scale_degrees, overwrite = TRUE)
+# scale_degrees <- list("norm" = c("I", "IIb", "II","IIIb", "III", "IV","IV#", "V", "VIb", "VI", "VIIb", "VII"),
+#                       "maj" = c("I", "IIb", "ii", "iii", "IV", "IV#", "V", "VIb", "vi", "VIIb", "viio"),
+#                       "min" = c("i", "IIb", "iio", "IIIb", "iv", "IV#", "V", "VIb", "vio", "VIIb", "viio"))
+# usethis::use_data(scale_degrees, overwrite = TRUE)
 
 get_triad_type <- function(chord_type){
   triad_types[chord_type]
@@ -112,6 +112,7 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
     keys <- add_key(keys, "maj", chord)#Ij7
     keys <- add_key(keys, "maj", chord, offset = 7)#IVj7
     keys <- add_key(keys, "min", chord, offset = 4)#VIbj7
+    keys <- add_key(keys, "min", chord, offset = -3)#IIIbj7
   }
   if(ctype == "maj"){
     keys <- add_key(keys, "X", chord, offset = 5)#V
@@ -143,12 +144,16 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
     keys <- add_key(keys, "X", chord, offset = +10)
     keys <- add_key(keys, "min", chord, offset = -1)
     keys <- add_key(keys, "maj", chord, offset = 0)
+    #keys <- add_key(keys, "blues", chord, offset = 6)
   }
   if(ctype == "7"){
-    keys <- add_key(keys, "X", chord, offset = +5)
-    keys <- add_key(keys, "X", chord, offset = -1)
-    keys <- add_key(keys, "blues", chord, offset = 0)
-    keys <- add_key(keys, "blues", chord, offset = -5)
+    keys <- add_key(keys, "X", chord, offset = +5)     #V7
+    keys <- add_key(keys, "X", chord, offset = -1)     #IIb7
+    if(!nzchar(chord$ext)){
+      keys <- add_key(keys, "blues", chord, offset = 0)  #I7
+      keys <- add_key(keys, "blues", chord, offset = -5) #IV7
+    }
+    keys <- add_key(keys, "min", chord, offset = -8)    #VIb7 in minor
     #keys <- add_key(keys, "maj", chord, offset = 1)
   }
   if(ctype == "6"){
@@ -247,7 +252,22 @@ print_analysis <- function(key_analysis){
   print(seq)
 }
 
-uniquify_sequence <- function(key_analysis){
+get_chord_sequence_complexity <- function(scale_degrees, key = "", use = F){
+  if(!use) return(0)
+
+  base_steps <- c( 'i', 'I', 'ii', 'iib', 'IIb', 'iii', 'IIIb', 'iv', 'IV', 'V', 'vi', 'vib', 'VIb', 'vii', 'VII', 'VIIb')
+  tonal_values <- c(0, 0, 0, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2) %>% set_names(base_steps)
+  scale_degrees <- scale_degrees %>% na.omit() %>% str_remove_all("m7b5|[j7o]")
+  tonal_complexity <- mean(tonal_values[scale_degrees], na.rm = T)
+  messagef("%s: %s -> %s = %.2f", key,
+           paste(scale_degrees, collapse = "-"),
+           paste(tonal_values[scale_degrees], collapse = "-"),
+           tonal_complexity)
+
+  tonal_complexity
+}
+
+uniquify_sequence <- function(key_analysis, key_hints = NULL, use_chord_complexity = F){
   #browser()
   non_uniques <- sum(!key_analysis$unique)
   if(non_uniques == 0){
@@ -256,9 +276,11 @@ uniquify_sequence <- function(key_analysis){
   if(sum(!key_analysis$unique) < nrow(key_analysis)){
     sections <- split_key_analysis_by_unique(key_analysis)
     if(nrow(sections) == 0){
-      messagef("Nothing to unify, returning object")
+      messagef("Nothing to unify")
       return(key_analysis)
     }
+    key_hints <- key_analysis %>% filter(unique) %>% count(key) %>% top_n(1) %>% pull(key)
+    #messagef("Key hints: %s", paste(key_hints, collapse = ", "))
     ret <-
       map_dfr(1:nrow(sections), function(i){
         start <- sections[i,]$start
@@ -269,7 +291,9 @@ uniquify_sequence <- function(key_analysis){
           ret <- key_analysis[start:end,]
         }
         else{
-          ret <- uniquify_sequence(key_analysis[start:end,])
+          ret <- uniquify_sequence(key_analysis[start:end,],
+                                   key_hints = key_hints,
+                                   use = use_chord_complexity)
         }
         if(nrow(ret) == 0){
           browser()
@@ -293,22 +317,29 @@ uniquify_sequence <- function(key_analysis){
   tonic_stats <-
     key_analysis %>% group_by(key) %>% summarise(num_tonics = sum(rel_pc == 0), .groups = "drop")
 
-  key_stats <- key_analysis%>%
+  key_stats <- key_analysis %>%
     group_by(key) %>%
-    summarise(n = n(), .groups = "drop") %>%
+    summarise(n = n(),
+              complexity = get_chord_sequence_complexity(scale_degree,
+                                                         key = unique(key),
+                                                         use = use_chord_complexity),
+              .groups = "drop") %>%
     mutate(full_coverage = n == chord_count,
-           is_major = str_detect(key, "maj")) %>%
+           is_major = str_detect(key, "maj"),
+           key_bias = key %in% key_hints) %>%
     left_join(tonic_stats, by = "key") %>%
-    arrange(desc(n), desc(full_coverage), desc(num_tonics), desc(is_major)) %>%
+    arrange(desc(n), desc(full_coverage), complexity, desc(num_tonics), desc(key_bias), desc(is_major)) %>%
     mutate(cs = cumsum(n))
 
   stopifnot(nrow(key_stats) > 0)
-  #browser()
+  #print(key_stats)
   keys <- key_stats[1,]$key
+
   if(length(keys) == 0){
     browser()
     return(key_analysis)
   }
+
   key_analysis <- key_analysis %>%
     group_by(chord_pos) %>%
     mutate(uncovered = !any(key %in% !!keys)) %>%
@@ -316,6 +347,7 @@ uniquify_sequence <- function(key_analysis){
     filter((key %in% keys) | uncovered) %>%
     select(-uncovered) %>%
     update_candidates()
+
   key_analysis
 }
 
@@ -379,7 +411,7 @@ find_II_V <- function(intrinsic_scale_degrees){
   isc %>% filter(keep) %>% select(-keep) %>% update_candidates()
 }
 
-single_key_analysis <- function(chord_stream, fuse_length = 3){
+single_key_analysis <- function(chord_stream, fuse_length = 3, use_chord_complexity = F){
   if(fuse_length == 3){
     cs <- chord_stream  %>%
       fuse_tonics2()
@@ -397,7 +429,7 @@ single_key_analysis <- function(chord_stream, fuse_length = 3){
     mutate(rel_pc = (chord_pc - tonic_pc) %% 12) %>%
     arrange(chord_pos, key) %>%
     sanity_check_key_analysis(label = "Check point 1") %>%
-    uniquify_sequence() %>%
+    uniquify_sequence(use_chord_complexity = use_chord_complexity) %>%
     sanity_check_key_analysis(label = "Check point 2")
 
 }
@@ -409,11 +441,11 @@ single_key_analysis <- function(chord_stream, fuse_length = 3){
 #'
 #' @param lead_sheet (data frame) A lead sheet data frame or NULL, if NULL \code{chord_stream} is used
 #' @param chord_stream (character string of chord symbols) A sequence of chords or NULL, if NULL \code{lead_sheet} is used, if both are NULL then an error is issued
-#' @param remove_reps (logical scalar) Flag if repeated chords shall removed (default is \code{TRUE}). Currently disabled.
+#' @param with_ii_v_filter (logical scalar)  Use ii-V detection (default is \code{TRUE}).
 #' @param add_metadata (logical scalar) Flag if (lead sheet) metadata (lead sheet info, analysis stats, key stats, estimated overall key) shall be added to result as attributes (default is \code{TRUE}).
 #' @return A key analysis data frame
 #' @export
-key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T, add_metadata = T){
+key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, with_ii_v_filter = T, use_chord_complexity = F, add_metadata = T){
   title <- ""
   compid <- NA
   single_chord <- F
@@ -450,23 +482,21 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, remove_reps = T
              rename(local_key = key,
                     local_scale_degree = scale_degree))
   }
-  if(remove_reps){
-    #tmp <- rle(chord_stream)
-    #chord_stream <- tmp$values
+  #browser()
+  if(with_ii_v_filter){
+    before <- nrow(chord_stream)
+    chord_stream <- chord_stream %>% find_II_V()
+    messagef("Before ii-V filter: %d, after: %d", before, nrow(chord_stream))
   }
-  before <- nrow(chord_stream)
-
-  chord_stream <- chord_stream %>% find_II_V()
-  messagef("Before ii-V filter: %d, after: %d", before, nrow(chord_stream))
   messagef("Analyzing: '%s' [%s]", unique(lead_sheet$title), unique(lead_sheet$compid))
   max_iter <- 5
   pass <- chord_stream
   last_unique_ratio <- 0
   last_pass <- NULL
   for(i in 1:max_iter){
+    pass2 <- single_key_analysis(pass, fuse_length = 2, use_chord_complexity = use_chord_complexity)
+    pass3 <- single_key_analysis(pass, fuse_length = 3, use_chord_complexity = use_chord_complexity)
     #browser()
-    pass2 <- single_key_analysis(pass, fuse_length = 2)
-    pass3 <- single_key_analysis(pass, fuse_length = 3)
     red2 <- get_reduction_factor(pass2) %>%  mutate(fuse_length = 2)
     red3 <- get_reduction_factor(pass3) %>%  mutate(fuse_length = 3)
     #print(bind_rows(red2, red3))

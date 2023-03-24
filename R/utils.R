@@ -39,7 +39,7 @@ add_format <- function(obj, format = ""){
 }
 
 has_column <- function(obj, col){
-  if(!is.character(obj)){
+  if(is.null(obj) || is.null(col) || !is.character(col)){
     return(FALSE)
   }
   col %in% names(obj)
