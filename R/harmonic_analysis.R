@@ -24,7 +24,13 @@ get_triad_type <- function(chord_type){
 get_scale_degree_code <- function(chord_label, key, as_df = FALSE){
   #browser()
   if(length(chord_label) > 1){
-    ret <- map_chr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = as_df))
+    if(as_df){
+      ret <- map_dfr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = as_df))
+    }
+    else{
+      ret <- map_chr(chord_label, function(ch) get_scale_degree_code(ch, key, as_df = as_df))
+    }
+
     return(ret)
   }
 
@@ -42,27 +48,17 @@ get_scale_degree_code <- function(chord_label, key, as_df = FALSE){
   pc_rel = (chord$pc[1] - key_pc) %% 12
   triad_type <- get_triad_type(ctype)
   scale_degree <- scale_degrees[["norm"]][pc_rel+1]
-  if(triad_type == "min"){
+
+  if(triad_type == "min" || triad_type == "o" ){
     scale_degree <- tolower(scale_degree)
   }
-  if(ctype == "m7b5"){
-    scale_degree <- sprintf("%sm7b5", tolower(scale_degree))
+  ctype <- ctype %>%
+    str_replace("maj7", "j7") %>%
+    str_remove("min") %>%
+    str_remove("maj")
 
-  }
-  else {
-    if(str_detect(ctype, "7")){
-      scale_degree <- sprintf("%s%s", scale_degree, ctype)
-      scale_degree <- str_remove(scale_degree, "min")
-      scale_degree <- str_remove(scale_degree, "ma")
-    }
-    else{
-      if(triad_type == "o"){
-        scale_degree <- tolower(scale_degree)
-        scale_degree <- sprintf("%so", scale_degree)
-      }
+  scale_degree <- sprintf("%s%s", scale_degree, ctype)
 
-    }
-  }
   if(as_df){
     tibble(tonic = key_letter, scale_degree = scale_degree)
   }
