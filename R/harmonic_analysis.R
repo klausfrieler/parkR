@@ -108,7 +108,7 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
     keys <- add_key(keys, "maj", chord)#Ij7
     keys <- add_key(keys, "maj", chord, offset = 7)#IVj7
     keys <- add_key(keys, "min", chord, offset = 4)#VIbj7
-    keys <- add_key(keys, "min", chord, offset = -3)#IIIbj7
+    #keys <- add_key(keys, "min", chord, offset = -3)#IIIbj7
   }
   if(ctype == "maj"){
     keys <- add_key(keys, "X", chord, offset = 5)#V
@@ -150,7 +150,7 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
       keys <- add_key(keys, "blues", chord, offset = -5) #IV7
     }
     keys <- add_key(keys, "min", chord, offset = -8)    #VIb7 in minor
-    #keys <- add_key(keys, "maj", chord, offset = 1)
+    keys <- add_key(keys, "maj", chord, offset = 1)    #VII7
   }
   if(ctype == "6"){
     keys <- add_key(keys, "maj", chord)#I6
