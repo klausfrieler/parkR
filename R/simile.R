@@ -37,7 +37,6 @@ get_all_ngrams <- function(x, N = 3){
 
 #as in  Müllensiefen & Frieler (2004)
 ngrukkon <- function(x, y, N = 3){
-  #browser()
   x <- get_all_ngrams(x, N = N) %>% pull(value)
   y <- get_all_ngrams(y, N = N) %>% pull(value)
   joint <- c(x, y) %>% table()
@@ -237,7 +236,7 @@ find_best_transposition <- function(pitch_vec1, pitch_vec2){
 opti3 <- function(pitch_vec1, dur_vec1, pitch_vec2, dur_vec2, N = 3, use_bootstrap = F, classify_duration = T){
   pitch_vec1 <- round(pitch_vec1)
   pitch_vec2 <- round(pitch_vec2)
-  v_ngrukkon <- ngrukkon(pitch_vec1, pitch_vec2, N = N)
+  v_ngrukkon <- ngrukkon(diff(pitch_vec1), diff(pitch_vec2), N = N)
   if(classify_duration){
     dur_vec1 <- classify_duration(dur_vec1)
     dur_vec2 <- classify_duration(dur_vec2)
@@ -301,8 +300,9 @@ opti3_df <- function(melody1, melody2, N = 3, use_bootstrap = F){
   if("bar" %in% names(melody2)){
     seg2 <- melody2$bar
   }
+  v_ngrukkon <- ngrukkon(diff(melody1$pitch), diff(melody2$pitch), N = N)
   sims <- map_dfr(trans_hints, function(th){
-    v_ngrukkon <- ngrukkon(melody1$pitch, melody2$pitch + th, N = N)
+    print(ngrukkon(diff(melody1$pitch), diff(melody2$pitch) + th, N = N))
     if(use_bootstrap){
       v_harmcore <- harmcore2(melody1$pitch,
                               melody2$pitch + th,
