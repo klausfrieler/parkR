@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_util.R
 \name{cdpcx_hist}
 \alias{cdpcx_hist}
-\title{get_cdpcx_hist
+\title{cdpcx_hist
 Plots a fancy cdpcx (extended chordal diatonic pitch class plot"}
 \usage{
 cdpcx_hist(
@@ -11,7 +11,7 @@ cdpcx_hist(
   colour_chromatic = T,
   percentage = T,
   fill_var = NULL,
-  cdpcx_col = "cdpcx_raw_all"
+  cdpcx_col = "cdpcx_raw"
 )
 }
 \arguments{
@@ -31,6 +31,6 @@ cdpcx_hist(
 A ggplot2 object
 }
 \description{
-get_cdpcx_hist
+cdpcx_hist
 Plots a fancy cdpcx (extended chordal diatonic pitch class plot"
 }

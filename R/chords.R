@@ -740,7 +740,7 @@ parse_wjd_form_part <- function(form_part){
 }
 
 split_wjd_changes <- function(changes, id = ""){
-  print(id)
+  messagef("Splitting chords for %s", id)
   lines <- strsplit(changes, "\n")[[1]]
   parts <- purrr::map_dfr(lines, parse_wjd_form_part)
   #browser()
@@ -758,6 +758,7 @@ split_wjd_changes <- function(changes, id = ""){
            bar_number  = bar_number + bar_offset) %>%
     select(-bar_offset) %>%
     mutate(id = id)
+  #browser()
   parts
 
 }
@@ -803,9 +804,13 @@ get_random_chord <- function(chord_db = parkR::irb){
 
 expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL, with_key_analysis = T){
   n_ids <- length(unique(split_changes$id))
+  messagef("***Expanding %d chord changes", n_ids)
   if(n_ids > 1){
-    return(purrr::map_dfr(ids, function(i){
-      expand_chord_changes(split_changes %>% filter(id == i))
+    return(purrr::map_dfr(unique(split_changes$id), function(i){
+      #messagef("### Recursive for %s", i)
+      tmp <- expand_chord_changes(split_changes %>% filter(id == i))
+      #messagef("### Recursive return for %s", i)
+      tmp
     }))
   }
   chorus_length <- max(split_changes$bar_number)
@@ -817,10 +822,11 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
   }
   if(with_key_analysis){
     #browser()
+    messagef("Enter key analysis (%d, %s)", length(unique(split_changes$id)), unique(split_changes$id))
+    #print()
     ka <- key_analysis(chord_stream = split_changes$original)
     if(sum(ka$unique) == nrow(ka)){
       split_changes <- bind_cols(split_changes, ka %>% select(local_key, local_scale_degree, tonic, tonic_pc))
-
     }
     else{
       messagef("Could not find unique key analysis")
@@ -829,9 +835,9 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
   }
 
   one_chorus <-
-    purrr::map_dfr(1:nrow(split_changes),function(row_id){
+    purrr::map_dfr(1:nrow(split_changes), function(row_id){
       t <- split_changes[row_id,]
-      purrr::map_dfr(seq(t$beat_pos, t$beat_pos + t$duration-1), function(b){
+      purrr::map_dfr(seq(t$beat_pos, t$beat_pos + t$duration - 1), function(b){
         t %>% select(-beat_pos) %>%  mutate(beat_pos = b)
       })
     })
@@ -844,6 +850,18 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
   multi_choruses
 }
 
+create_wjd_local_key_annotations <- function(data = jazzodata::wjd_meta){
+  map_dfr(unique(data$id), function(i){
+    tmp <- data %>% filter(id == i)
+    parkR:::create_expanded_wjd_chord(tmp %>% select(id, chord_changes),
+                                      num_choruses = tmp %>% pull(chorus_count),
+                                      with_key_analysis = T)
+
+  }) %>%
+    mutate(melid = as.integer(factor(id)),
+           beat_id = sprintf("%s_%s_%s", melid, beat_pos, bar_number))
+
+}
 create_expanded_wjd_chord <- function(changes, num_choruses = NULL, max_bar = NULL, with_key_analysis  = F ){
   purrr::map2_dfr(changes$chord_changes,
            changes$id,

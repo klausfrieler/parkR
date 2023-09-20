@@ -108,7 +108,7 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
     keys <- add_key(keys, "maj", chord)#Ij7
     keys <- add_key(keys, "maj", chord, offset = 7)#IVj7
     keys <- add_key(keys, "min", chord, offset = 4)#VIbj7
-    keys <- add_key(keys, "min", chord, offset = -3)#IIIbj7
+    #keys <- add_key(keys, "min", chord, offset = -3)#IIIbj7
   }
   if(ctype == "maj"){
     keys <- add_key(keys, "X", chord, offset = 5)#V
@@ -144,13 +144,15 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
   }
   if(ctype == "7"){
     keys <- add_key(keys, "X", chord, offset = +5)     #V7
-    keys <- add_key(keys, "X", chord, offset = -1)     #IIb7
+    if(chord$ext != "sus"){
+      keys <- add_key(keys, "X", chord, offset = -1)     #IIb7
+    }
     if(!nzchar(chord$ext)){
       keys <- add_key(keys, "blues", chord, offset = 0)  #I7
       keys <- add_key(keys, "blues", chord, offset = -5) #IV7
     }
-    keys <- add_key(keys, "min", chord, offset = -8)    #VIb7 in minor
-    #keys <- add_key(keys, "maj", chord, offset = 1)
+    #keys <- add_key(keys, "min", chord, offset = -8)    #VIb7 in minor
+    keys <- add_key(keys, "maj", chord, offset = 1)      #VII7
   }
   if(ctype == "6"){
     keys <- add_key(keys, "maj", chord)#I6
@@ -470,7 +472,7 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, with_ii_v_filte
   if(single_chord){
     ret <- chord_stream %>% filter((chord_pc - tonic_pc) %% 12 == 0)
     if(nrow(ret) == 0){
-      chord_stream[1,]
+      ret <- chord_stream[1,]
     }
     return(ret %>%
              mutate(chord_pos = 1,
