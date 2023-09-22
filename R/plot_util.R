@@ -24,11 +24,11 @@ basic_theme <- "minimal"
 #' @export
 nice_cdpcx <- function(cdpcx_values){
   #Order and re-label raw CDPCX values for display
-  cdpcx_factor <- factor(cdpcx_factor,
+  cdpcx_values <- factor(cdpcx_values,
                          levels = c("1", "2", "3", "4", "5", "6", "7", "B", "L", "T", "<", ">", "-", "%"),
                          labels = parkR::labels$cdpcx_labels
                          )
-  return(cdpcx_factor)
+  return(cdpcx_values)
 }
 
 get_default_theme <- function(x_rotate = 0, keep_legend = F){
@@ -78,7 +78,7 @@ get_default_theme <- function(x_rotate = 0, keep_legend = F){
 
 cpc_plot <- function(cpc_vec){
   q<- ggplot(data.frame(cpc = factor(cpc_vec, levels = 0:11, labels = 0:11)),
-             aes(x = cpc, y =..count..))
+             aes(x = cpc, y = after_stat(count)))
 
   q <- q + geom_bar()
   q <- q + scale_x_discrete(drop = F)
@@ -136,7 +136,7 @@ cpc_plot_solo <- function(solo, by_chord = T){
       mutate(cpc = (pitch - parse_chord(chord)$pc) %% 12)
   }
   solo <- solo %>% mutate(cpc = factor(cpc, levels = 0:11, labels = 0:11))
-  q<- ggplot(solo, aes(x = cpc, y = ..count..))
+  q<- ggplot(solo, aes(x = cpc, y = after_stat(count)))
 
   q <- q + geom_bar(fill = default_color)
   q <- q + scale_x_discrete(drop = F)
@@ -191,13 +191,13 @@ phrase_over_form2 <- function(solo, beats, bar_unit = 4, size = 1, width=.5){
 add_geom_bar <- function(q, percentage = T, fill_var = NULL, palette = jazzomat_palette[["set1"]]){
   if (percentage){
     if (is.null(fill_var)){
-      q <- q + geom_bar(aes(y = ..count../tapply(..count..,..PANEL..,sum)[..PANEL..]),
+      q <- q + geom_bar(aes(y = after_stat(count)/tapply(after_stat(count),after_stat(PANEL),sum)[after_stat(PANEL)]),
                         fill = palette[[1]],
                         position = position_dodge())
       q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
     }
     else{
-      q <- q + geom_bar(aes_string(y = "..count../tapply(..count..,..PANEL..,sum)[..PANEL..]",
+      q <- q + geom_bar(aes_string(y = "after_stat(count)/tapply(after_stat(count),after_stat(PANEL),sum)[after_stat(PANEL)]",
                                    fill = fill_var),
                         position = position_dodge())
       q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
@@ -221,7 +221,7 @@ add_geom_bar <- function(q, percentage = T, fill_var = NULL, palette = jazzomat_
 add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, colour = "black", palette = jazzomat_palette[["set1"]]){
   if (percentage){
     if (is.null(fill_var)){
-      q <- q + geom_histogram(aes(y = ..count../tapply(..count.., ..PANEL..,sum)[..PANEL..]),
+      q <- q + geom_histogram(aes(y = after_stat(count)/tapply(after_stat(count), after_stat(PANEL),sum)[after_stat(PANEL)]),
                               fill = palette[[1]],
                               colour = colour,
                               binwidth = binwidth,
@@ -229,7 +229,7 @@ add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, c
       q <- q + scale_y_continuous(labels = scales::percent, name = "Percentage (%)")
     }
     else{
-      q <- q + geom_histogram(aes_string(y = "..count../tapply(..count..,..PANEL..,sum)[..PANEL..]",
+      q <- q + geom_histogram(aes_string(y = "after_stat(count)/tapply(after_stat(count),after_stat(PANEL),sum)[after_stat(PANEL)]",
                                          fill = fill_var),
                               colour = colour,
                               binwidth = binwidth,
@@ -256,7 +256,7 @@ add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, c
   q
 }
 
-#' get_cdpcx_hist
+#' cdpcx_hist
 #' Plots a fancy cdpcx (extended chordal diatonic pitch class plot"
 #' @param data (data frame) most contain cdpcx_col as variable with cdpcx data
 #' @param id (string or integer) Optional set of ids to filter
@@ -267,7 +267,7 @@ add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, c
 #'
 #' @return A ggplot2 object
 #' @export
-cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fill_var = NULL, cdpcx_col = "cdpcx_raw_all"){
+cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fill_var = NULL, cdpcx_col = "cdpcx_raw"){
   tmp <- select_by_id(data, id)
   tmp <- tmp[tmp[[cdpcx_col]] != "X",]
   tmp <- tmp[tmp[[cdpcx_col]] != "",]
@@ -301,6 +301,27 @@ cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fi
                             drop = FALSE)
   return (q)
 }
+
+#' cpc_hist
+#'
+#' Plots a fancy chordal pitch class plot
+#' @param data (data frame) must contain "cpc_col" as variable with chordal pitch class data
+#' @param id (string or integer) Optional set of ids to filter
+#' @param percentage (boolean) Flag, whether to use percentage scale on y-axis
+#' @param fill_var (string) extra fill variable
+#' @param cpc_col (string) column name where chordal pitch class data is stored, defaults to "cpc_raw"
+#'
+#' @return A ggplot2 object
+#' @export
+cpc_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, cpc_col = "cpc_raw"){
+  tmp <- select_by_id(data, id)
+  q <- ggplot(tmp, aes(x = factor(!!sym(cpc_col), levels = 0:11)))
+  q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
+  q <- q + get_default_theme() + theme(legend.position = "none")
+  q <- q + scale_x_discrete(name = "Chordal Pitch Class", drop = FALSE, labels = parkR::labels[["cpc_labels"]])
+  q
+}
+
 
 #' pc_hist
 #'

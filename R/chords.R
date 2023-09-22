@@ -741,6 +741,7 @@ parse_wjd_form_part <- function(form_part){
 
 split_wjd_changes <- function(changes, id = ""){
   messagef("Splitting chords for %s", id)
+  #browser()
   lines <- strsplit(changes, "\n")[[1]]
   parts <- purrr::map_dfr(lines, parse_wjd_form_part)
   #browser()
@@ -802,9 +803,14 @@ get_random_chord <- function(chord_db = parkR::irb){
   }
 }
 
-expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL, with_key_analysis = T){
+expand_chord_changes <- function(split_changes,
+                                 num_choruses = 1,
+                                 max_bar = NULL,
+                                 with_key_analysis = T,
+                                 bars_in_solo = NULL){
   n_ids <- length(unique(split_changes$id))
   messagef("***Expanding %d chord changes", n_ids)
+  browser()
   if(n_ids > 1){
     return(purrr::map_dfr(unique(split_changes$id), function(i){
       #messagef("### Recursive for %s", i)
@@ -812,6 +818,10 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
       #messagef("### Recursive return for %s", i)
       tmp
     }))
+  }
+  if(nrow(split_changes) == 1){
+    message("Single chord song detected")
+    return(NULL)
   }
   chorus_length <- max(split_changes$bar_number)
   if(!is.null(max_bar)) {
@@ -831,7 +841,6 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
     else{
       messagef("Could not find unique key analysis")
     }
-
   }
 
   one_chorus <-
@@ -851,15 +860,23 @@ expand_chord_changes <- function(split_changes, num_choruses = 1, max_bar = NULL
 }
 
 create_wjd_local_key_annotations <- function(data = jazzodata::wjd_meta){
-  map_dfr(unique(data$id), function(i){
+  ret <-
+    map_dfr(unique(data$id), function(i){
     tmp <- data %>% filter(id == i)
+    browser()
     parkR:::create_expanded_wjd_chord(tmp %>% select(id, chord_changes),
                                       num_choruses = tmp %>% pull(chorus_count),
                                       with_key_analysis = T)
 
-  }) %>%
-    mutate(melid = as.integer(factor(id)),
-           beat_id = sprintf("%s_%s_%s", melid, beat_pos, bar_number))
+  })
+  browser()
+  if(nrow(ret) == 0){
+    messagef("Invalid expand")
+    return(NULL)
+  }
+  ret %>%
+    mutate(melid = as.integer(factor(id, levels = unique(data$id))),
+           beat_id = sprintf("%s_%s_%s", melid, bar_number, beat_pos))
 
 }
 create_expanded_wjd_chord <- function(changes, num_choruses = NULL, max_bar = NULL, with_key_analysis  = F ){
