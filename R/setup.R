@@ -22,7 +22,7 @@ get_simple_successor_list <- function(data, var, reduce_frac = 0){
   ret %>% filter(!is.na(value), !is.na(successor))
 }
 
-setup_distibrutions <- function(recalc = F){
+setup_distribrutions <- function(recalc = F){
   if(recalc){
     if(!requireNamespace("jazzodata", quietly = TRUE)){
       stop("Recalculation of distributions requries 'jazzodata' package.")
@@ -51,7 +51,6 @@ setup_distibrutions <- function(recalc = F){
   }
   else{
     load("data/successor_dist.rda")
-
   }
 
   if(recalc){
@@ -71,7 +70,6 @@ setup_distibrutions <- function(recalc = F){
   }
   else{
     load("data/length_dist.rda")
-
   }
 
   if(recalc){

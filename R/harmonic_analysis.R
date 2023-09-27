@@ -143,13 +143,16 @@ get_intrinsic_scale_degree <- function(chord_label, chord_pos = NULL){
     #keys <- add_key(keys, "blues", chord, offset = 6)
   }
   if(ctype == "7"){
-    keys <- add_key(keys, "X", chord, offset = +5)     #V7
+    keys <- add_key(keys, "X", chord, offset = +5) # V7
+
     if(chord$ext != "sus"){
       keys <- add_key(keys, "X", chord, offset = -1)     #IIb7
     }
     if(!nzchar(chord$ext)){
       keys <- add_key(keys, "blues", chord, offset = 0)  #I7
       keys <- add_key(keys, "blues", chord, offset = -5) #IV7
+      keys <- add_key(keys, "blues", chord, offset = +2)#VIIb7
+      keys <- add_key(keys, "X", chord, offset = +2) # VIIb7
     }
     #keys <- add_key(keys, "min", chord, offset = -8)    #VIb7 in minor
     keys <- add_key(keys, "maj", chord, offset = 1)      #VII7
@@ -464,7 +467,6 @@ key_analysis <- function(lead_sheet = NULL, chord_stream = NULL, with_ii_v_filte
   else{
     if(!is.character(chord_stream)){
       stop("You must provide either lead_sheet data frame or a chord_stream character vector of chord labels)")
-
     }
     single_chord <- length(chord_stream) == 1
     chord_stream <- get_intrinsic_scale_degree(chord_stream)

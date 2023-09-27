@@ -284,7 +284,6 @@ parse_chord <- function(chord_label){
     chord_label <- sprintf("%s%s", chord_label, "7")
   }
 
-
   for(ct in chord_types){
     if(str_detect(chord_label, ct)){
       type <- ct
