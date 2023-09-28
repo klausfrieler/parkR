@@ -34,7 +34,7 @@ ggassoc <- function(cont_tab,
                     subtitle = "",
                     spread = 2.25,
                     text_size = 3,
-                    fill_colors = jazzomat_palette$set1[1:2],
+                    fill_colors = parkR::jazzomat_palette$set1[1:2],
                     std = F,
                     raw = T){
   names <- dimnames(cont_tab)
@@ -115,7 +115,7 @@ ggassoc2 <- function(cont_tab,
                      title = "Chi-Square Residuals",
                      subtitle = "",
                      layout = c("vertical", "horizontal"),
-                     fill_colors = jazzomat_palette$set1[1:2]){
+                     fill_colors = parkR::jazzomat_palette$set1[1:2]){
   layout <- match.arg(layout)
   names <- dimnames(cont_tab)
   if(length(names[[1]]) != 2){
