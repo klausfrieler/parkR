@@ -188,7 +188,8 @@ phrase_over_form2 <- function(solo, beats, bar_unit = 4, size = 1, width=.5){
   return(q)
 }
 
-add_geom_bar <- function(q, percentage = T, fill_var = NULL, palette = jazzomat_palette[["set1"]]){
+add_geom_bar <- function(q, percentage = T,
+                         fill_var = NULL, palette = parkR::jazzomat_palette[["set1"]]){
   if (percentage){
     if (is.null(fill_var)){
       q <- q + geom_bar(aes(y = after_stat(count)/tapply(after_stat(count),after_stat(PANEL),sum)[after_stat(PANEL)]),
@@ -218,7 +219,9 @@ add_geom_bar <- function(q, percentage = T, fill_var = NULL, palette = jazzomat_
   q
 
 }
-add_histogram <- function(q, percentage = T, binwidth = NULL, fill_var = NULL, colour = "black", palette = jazzomat_palette[["set1"]]){
+add_histogram <- function(q, percentage = T, binwidth = NULL,
+                          fill_var = NULL, colour = "black",
+                          palette = parkR::jazzomat_palette[["set1"]]){
   if (percentage){
     if (is.null(fill_var)){
       q <- q + geom_histogram(aes(y = after_stat(count)/tapply(after_stat(count), after_stat(PANEL),sum)[after_stat(PANEL)]),
@@ -289,7 +292,8 @@ cdpcx_hist <- function(data, id = NULL, colour_chromatic = T, percentage = T, fi
       q <- add_geom_bar(q, percentage, fill_var = "chromatic")
     }
     else{
-      q <- add_geom_bar(q, percentage, fill_var = "chromatic2", palette = jazzomat_palette[["set2"]])
+      q <- add_geom_bar(q, percentage, fill_var = "chromatic2",
+                        palette = parkR::jazzomat_palette[["set2"]])
     }
   }
   else{
