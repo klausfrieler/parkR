@@ -17,5 +17,5 @@ chorus_to_mcsv2(chorus_tbl, tempo = 120, chorus_id = 1)
 A solo data frame in MCSV2 format
 }
 \description{
-This function formats a generated chorus to mcsv2-compatible data fraem
+This function formats a generated chorus to mcsv2-compatible data frame
 }

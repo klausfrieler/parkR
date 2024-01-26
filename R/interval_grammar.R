@@ -92,7 +92,7 @@ int_span <- function(start, end){
 
 #' @export
 vec_to_value <- function(int_vec){
-  sprintf("[%s]", paste(int_vec, collapse=","))
+  sprintf("[%s]", paste(int_vec, collapse = ","))
 }
 
 add_overlaps <- function(data, type = c("all", "pre", "post")) {
@@ -479,8 +479,7 @@ fill_up_classes <- function(int_vector, class_df){
                      direction = sign(sum(int_vector[1:l])),
                      value = vec_to_value(int_vector[1:l]),
                      start = 1,
-                     end = l,
-                     stringsAsFactors = F)
+                     end = l)
     return(prefix)
   }
   events <- int_span(class_df$start, class_df$end)
@@ -1005,9 +1004,10 @@ find_wba_by_phrase <- function(data, id = NULL){
   }
   phrases <- unique(data$phrase_id)
   ret <- list()
+  int_col <- ifelse("int" %in% names(data), "int", "int_raw")
   for(i in phrases){
     #print(sprintf("Checking phrase %d", i))
-    int_vector <- data[data$phrase_id == i,]$int_raw %>% na.omit()
+    int_vector <- data[data$phrase_id == i, ] %>% pull(!!int_col) %>% na.omit()
     #ignore last interval because it belongs to next phrase
     tmp <- find_wba(int_vector[1:(length(int_vector)-1)])
     tmp$phrase_id <- i
