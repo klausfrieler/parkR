@@ -146,7 +146,7 @@ get_arp_int_from_int <- function(x){
     return(sapply(x,  get_arp_int_from_int))
   }
   x <- x[1]
-  if(!is.na(x) && abs(x) >=3 ){
+  if(!is.na(x) && abs(x) >= 3 ){
     return(TRUE)
   }
   return(FALSE)
@@ -203,7 +203,7 @@ make_rle_df <- function(data, var){
 }
 
 values_from_positions <- function(int_vector, data){
-  map2_chr(data$start, data$end, ~{vec_to_value(int_vector[.x:.y])})
+  map2_chr(data$start, data$end, ~{vec_to_value(int_vector[.x : .y])})
 }
 
 directions_from_positions <- function(int_vector, data){
@@ -355,24 +355,34 @@ find_arpeggios <- function(int_vector){
 
 
 find_chords <- function(int_vector){
-  arp_int_vector <- sign(int_vector)*get_arp_int_from_int(int_vector)
+  arp_int_vector <- sign(int_vector) * get_arp_int_from_int(int_vector)
   tmp <- get_rle_df(arp_int_vector)
-  tmp <- tmp %>% filter(value > 0, length>1)
-  if(nrow(tmp) == 0){
-    return(NULL)
+  tmp2 <- tmp %>% filter(value != 0, length > 1)
+  if(nrow(tmp2) == 0){
+    iv <- int_vector[int_vector != 0] %>% cumsum()
+    iv <- iv %% 12 %>% sort() %>% diff()
+    if(length(setdiff(iv, c(3, 4))) != 0){
+      return(NULL)
+    }
+    tmp <- tibble(length = length(int_vector),
+                 direction = sign(cumsum(int_vector)[-1]),
+                 start = 1,
+                 end = length(int_vector))
   }
+  browser()
+
   tmp$type <- "J"
   tmp$value <- values_from_positions(int_vector, tmp)
   triads<- !as.logical(
     unlist(
       lapply(
         tmp$value,
-        function(x) length(setdiff(unique(abs(value_to_vec(x))), c(3,4)))
+        function(x) length(setdiff(unique(abs(value_to_vec(x))), c(3, 4)))
         )
       )
   )
   #print(triads)
-  if(length(triads) >0 && sum(triads)){
+  if(length(triads) > 0 && sum(triads)){
     tmp[triads,]$type <- "A"
   }
   tmp
@@ -693,7 +703,7 @@ fuse_row_pair <- function(data, row_index){
 
 resolve_row_pair <- function(data, row_index){
   #browser()
-  if(row_index <1 || row_index > nrow(data)){
+  if(row_index < 1 || row_index > nrow(data)){
     stop("Invalid row index")
   }
   #pat1 <- data[row_index,]$pattern
