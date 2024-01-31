@@ -361,19 +361,19 @@ find_chords <- function(int_vector){
   arp_int_vector <- sign(int_vector) * get_arp_int_from_int(int_vector)
   tmp <- get_rle_df(arp_int_vector)
   tmp2 <- tmp %>% filter(value != 0, length > 1)
-  if(nrow(tmp2) == 0){
+
+  if(!all( get_arp_int_from_int(int_vector))){
     iv <- int_vector[int_vector != 0] %>% cumsum()
     iv <- iv %% 12 %>% sort() %>% diff()
     if(length(setdiff(iv, c(3, 4))) != 0){
       return(NULL)
     }
     tmp <- tibble(length = length(int_vector),
-                 direction = sign(cumsum(int_vector)[-1]),
+                 direction = sign(cumsum(int_vector)[length(int_vector)]),
                  start = 1,
                  end = length(int_vector))
   }
-  browser()
-
+  #browser()
   tmp$type <- "J"
   tmp$value <- values_from_positions(int_vector, tmp)
   triads<- !as.logical(
@@ -535,6 +535,7 @@ normalize <- function(data){
 
 find_classes <- function(int_vector, debug = F){
   if(debug) cat("Testing", paste(int_vector, collapse = ","), "\n")
+  browser()
   repetitions <- find_repetitions(int_vector)
   #print(repetitions)
   scales <- find_scales(int_vector)
