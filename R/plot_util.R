@@ -31,48 +31,65 @@ nice_cdpcx <- function(cdpcx_values){
   return(cdpcx_values)
 }
 
-get_default_theme <- function(x_rotate = 0, keep_legend = F){
-  if (basic_theme == "tufte"){
+get_default_theme <- function(x_rotate = 0,
+                              keep_legend = F) {
+  if (basic_theme == "tufte") {
     t <- ggthemes::theme_tufte()
-    t <- t + theme(strip.text=element_text(size=round(default_text_size*.75), hjust=0))
-    t <- t + theme(panel.border=element_blank())
+    t <- t + theme(strip.text = element_text(
+      size = round(default_text_size * .75),
+      hjust = 0
+    ))
+    t <- t + theme(panel.border = element_blank())
   }
-  else if(basic_theme == "minimal"){
+  else if (basic_theme == "minimal") {
     t <- theme_minimal()
-    t <- t + theme(strip.text=element_text(size=round(default_text_size*.75), hjust=0))
-    t <- t + theme(panel.border=element_blank())
-    t <- t + theme(panel.grid.major	= element_line(colour=default_grid_color, size=.3))
+    t <- t + theme(strip.text = element_text(
+      size = round(default_text_size * .75),
+      hjust = 0
+    ))
+    t <- t + theme(panel.border = element_blank())
+    t <- t + theme(panel.grid.major	= element_line(colour = default_grid_color,
+                                                   size = .3))
     t <- t + theme(panel.grid.minor	= element_blank())
   }
-  else if(basic_theme == "bw"){
+  else if (basic_theme == "bw") {
     t <- theme_bw()
-    t <- t + theme(strip.text=element_text(size=round(default_text_size*.75), hjust=.5))
-    t <- t + theme(strip.background = element_rect(fill = "white", color="white") )
+    t <- t + theme(strip.text = element_text(
+      size = round(default_text_size * .75),
+      hjust = .5
+    ))
+    t <- t + theme(strip.background = element_rect(fill = "white", color =  "white"))
   }
-  else if(basic_theme == "few"){
+  else if (basic_theme == "few") {
     t <- ggthemes::theme_few()
-    t <- t + theme(strip.text=element_text(size=round(default_text_size*.75), hjust=0))
+    t <- t + theme(strip.text = element_text(
+      size = round(default_text_size * .75),
+      hjust = 0
+    ))
   }
-  t <- t + theme(text=element_text(size=default_text_size))
+  t <- t + theme(text = element_text(size = default_text_size))
   t <- t + theme(axis.title.x = element_text(size = default_text_size, vjust = -.5))
-  if (x_rotate != 0){
-    t <- t + theme(axis.text.x = element_text(size=round(default_text_size *.85), angle=x_rotate, hjust=1))
+  if (x_rotate != 0) {
+    t <- t + theme(axis.text.x = element_text(
+      size = round(default_text_size * .85),
+      angle = x_rotate,
+      hjust = 1
+    ))
   }
   else{
-    t <- t + theme(axis.text.x = element_text(size=round(default_text_size *.85)))
-
+    t <- t + theme(axis.text.x = element_text(size = round(default_text_size * .85)))
   }
-  t <- t + theme(plot.title=element_text(hjust=0))
-  t <- t + theme(panel.spacing.x=unit(0.5, "cm"))
-  t <- t + theme(panel.spacing.y=unit(0.5, "cm"))
-  t <- t + theme(legend.title=element_text(size=default_text_size))
+  t <- t + theme(plot.title = element_text(hjust = 0))
+  # t <- t + theme(panel.spacing.x = unit(0.5, "cm"))
+  # t <- t + theme(panel.spacing.y = unit(0.5, "cm"))
+  t <- t + theme(legend.title = element_text(size = default_text_size))
   #t <- t + theme(legend.title.align=1)
-  t <- t + theme(legend.text=element_text(size=round(default_text_size*.75)))
-  if(!keep_legend){
-    t <- t + theme(legend.position="none")
+  t <- t + theme(legend.text = element_text(size = round(default_text_size * .75)))
+  if (!keep_legend) {
+    t <- t + theme(legend.position = "none")
   }
-  t <- t + theme(legend.key.size=unit(0.5, "cm"))
-  t <- t + theme(legend.key.width=unit(.1, "cm"))
+  # t <- t + theme(legend.key.size = unit(0.5, "cm"))
+  # t <- t + theme(legend.key.width = unit(.1, "cm"))
   t
 }
 
@@ -105,7 +122,8 @@ pitch_plot <- function(pitch_vec){
 #' @param by_chorus (logical scalar) Flag to add chorus facets
 #' @export
 piano_roll <- function(solo, by_chorus = T){
-  if(get_format(solo) != "mcsv2"){
+  format <- get_format(solo)
+  if(is.null(format) || format != "mcsv2"){
     messagef("Warning: piano_roll plot only for mcsv2 data")
     return(NULL)
   }
@@ -127,7 +145,8 @@ piano_roll <- function(solo, by_chorus = T){
 #' @param by_chord (logical scalar) Flag to add chord facets
 #' @export
 cpc_plot_solo <- function(solo, by_chord = T){
-  if(get_format(solo) != "mcsv2"){
+  format <- get_format(solo)
+  if(is.null(format) || format != "mcsv2"){
     messagef("Warning: piano_roll plot only for mcsv2 data")
     return(NULL)
   }

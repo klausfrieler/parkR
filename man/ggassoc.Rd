@@ -13,7 +13,7 @@ ggassoc(
   subtitle = "",
   spread = 2.25,
   text_size = 3,
-  fill_colors = jazzomat_palette$set1[1:2],
+  fill_colors = parkR::jazzomat_palette$set1[1:2],
   std = F,
   raw = T
 )

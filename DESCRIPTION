@@ -35,5 +35,5 @@ Imports:
 Suggests:
     devtools (>= 1.13.6)
 Remotes:
-    github/klausfrieler/jazzodata
-RoxygenNote: 7.2.3
+    klausfrieler/jazzodata
+RoxygenNote: 7.3.2

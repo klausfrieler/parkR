@@ -12,7 +12,7 @@ ggassoc2(
   title = "Chi-Square Residuals",
   subtitle = "",
   layout = c("vertical", "horizontal"),
-  fill_colors = jazzomat_palette$set1[1:2]
+  fill_colors = parkR::jazzomat_palette$set1[1:2]
 )
 }
 \arguments{
