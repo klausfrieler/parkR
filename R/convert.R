@@ -4,7 +4,7 @@ beats_per_bar <- 4
 
 #' phrase_to_mcsv2
 #'
-#' This function format a generated phrase to mcsv2-like data fraem
+#' This function format a generated phrase to mcsv2-like data frame
 #'
 #' @param phrase_tbl (data frame) generated phrase data.frame
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.
@@ -38,7 +38,7 @@ phrase_to_mcsv2 <- function(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 
 
 #' chorus_to_mcsv2
 #'
-#' This function formats a generated chorus to mcsv2-compatible data fraem
+#' This function formats a generated chorus to mcsv2-compatible data frame
 #'
 #' @param chorus_tbl (data frame) generated phrases in data.frame
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.
@@ -55,7 +55,7 @@ chorus_to_mcsv2 <- function(chorus_tbl, tempo = 120, chorus_id = 1){
 
 #' solo_to_mcsv2
 #'
-#' This function formats a generated solo to mcsv2-compatible data fraem
+#' This function formats a generated solo to mcsv2-compatible data frame
 #'
 #' @param solo_tbl (data frame) generated phrases in data.frame
 #' @param tempo (double scale) Tempo (bpm) of  the generated solo.

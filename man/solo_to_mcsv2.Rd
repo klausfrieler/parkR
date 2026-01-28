@@ -15,5 +15,5 @@ solo_to_mcsv2(solo_tbl, tempo = 120)
 A solo data frame in MCSV2 format
 }
 \description{
-This function formats a generated solo to mcsv2-compatible data fraem
+This function formats a generated solo to mcsv2-compatible data frame
 }

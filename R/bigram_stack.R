@@ -243,7 +243,14 @@ get_all_subgrams <- function(bigram_stack, bi_enc, level, mode = "all"){
 }
 
 #' @export
-ngram_analysis <- function(x, max_level = Inf, with_overlap = T, min_level = 2, min_n = 2, min_DF = 1, excess_n = 1, ids = NULL){
+ngram_analysis <- function(x,
+                           max_level = Inf,
+                           with_overlap = T,
+                           min_level = 2,
+                           min_n = 2,
+                           min_DF = 1,
+                           excess_n = 1,
+                           ids = NULL){
   #if(is.null(ids)){
   #  if("id" %in% names(x) && is.dataframe(x)){
   #    ids <- x$ids

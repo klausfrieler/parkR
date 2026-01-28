@@ -19,5 +19,5 @@ phrase_to_mcsv2(phrase_tbl, tempo = 120, phrase_id = 1, chorus_id = 1)
 A solo data frame in MCSV2 format
 }
 \description{
-This function format a generated phrase to mcsv2-like data fraem
+This function format a generated phrase to mcsv2-like data frame
 }

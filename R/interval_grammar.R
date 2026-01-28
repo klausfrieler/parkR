@@ -39,24 +39,27 @@ value_to_vec2 <- function(value_str, type = c("integer", "character"), collapse 
 }
 
 #' @export
-value_to_vec <- function(value_str, type = c("integer", "character", "double"), collapse = "", simplify = T){
+value_to_vec <- function(value_str,
+                         type = c("integer", "character", "double"),
+                         collapse = "",
+                         simplify = T){
   type <- match.arg(type)
   if(type == "integer"){
-    ret <- str_extract_all(value_str, "[0-9]+") %>% lapply(as.integer)
+    ret <- stringr::str_extract_all(value_str, "[+-]?[0-9]+") %>% lapply(as.integer)
     if(length(value_str) == 1  && simplify){
       ret <- ret[[1]]
     }
     return(ret)
   }
   else if(type == "double"){
-    ret <- str_extract_all(value_str, "[0-9\\.]+") %>% lapply(as.numeric)
+    ret <- stringr::str_extract_all(value_str, "[+-]?[0-9\\.]+") %>% lapply(as.numeric)
     if(length(value_str) == 1 && simplify){
       ret <- ret[[1]]
     }
     return(ret)
   }
   else{
-    return(str_remove_all(value_str, "[\\[\\]\\{\\}\\(\\)]") %>% str_replace_all("[,]+", collapse))
+    return(stringr::str_remove_all(value_str, "[\\[\\]\\{\\}\\(\\)]") %>% str_replace_all("[,]+", collapse))
 
   }
 }
@@ -92,7 +95,7 @@ int_span <- function(start, end){
 
 #' @export
 vec_to_value <- function(int_vec){
-  sprintf("[%s]", paste(int_vec, collapse=","))
+  sprintf("[%s]", paste(int_vec, collapse = ","))
 }
 
 add_overlaps <- function(data, type = c("all", "pre", "post")) {
@@ -146,7 +149,7 @@ get_arp_int_from_int <- function(x){
     return(sapply(x,  get_arp_int_from_int))
   }
   x <- x[1]
-  if(!is.na(x) && abs(x) >=3 ){
+  if(!is.na(x) && abs(x) >= 3 ){
     return(TRUE)
   }
   return(FALSE)
@@ -203,7 +206,7 @@ make_rle_df <- function(data, var){
 }
 
 values_from_positions <- function(int_vector, data){
-  map2_chr(data$start, data$end, ~{vec_to_value(int_vector[.x:.y])})
+  map2_chr(data$start, data$end, ~{vec_to_value(int_vector[.x : .y])})
 }
 
 directions_from_positions <- function(int_vector, data){
@@ -355,24 +358,34 @@ find_arpeggios <- function(int_vector){
 
 
 find_chords <- function(int_vector){
-  arp_int_vector <- sign(int_vector)*get_arp_int_from_int(int_vector)
+  arp_int_vector <- sign(int_vector) * get_arp_int_from_int(int_vector)
   tmp <- get_rle_df(arp_int_vector)
-  tmp <- tmp %>% filter(value > 0, length>1)
-  if(nrow(tmp) == 0){
-    return(NULL)
+  tmp2 <- tmp %>% filter(value != 0, length > 1)
+
+  if(!all( get_arp_int_from_int(int_vector))){
+    iv <- int_vector[int_vector != 0] %>% cumsum()
+    iv <- iv %% 12 %>% sort() %>% diff()
+    if(length(setdiff(iv, c(3, 4))) != 0){
+      return(NULL)
+    }
+    tmp <- tibble(length = length(int_vector),
+                 direction = sign(cumsum(int_vector)[length(int_vector)]),
+                 start = 1,
+                 end = length(int_vector))
   }
+  #browser()
   tmp$type <- "J"
   tmp$value <- values_from_positions(int_vector, tmp)
   triads<- !as.logical(
     unlist(
       lapply(
         tmp$value,
-        function(x) length(setdiff(unique(abs(value_to_vec(x))), c(3,4)))
+        function(x) length(setdiff(unique(abs(value_to_vec(x))), c(3, 4)))
         )
       )
   )
   #print(triads)
-  if(length(triads) >0 && sum(triads)){
+  if(length(triads) > 0 && sum(triads)){
     tmp[triads,]$type <- "A"
   }
   tmp
@@ -479,8 +492,7 @@ fill_up_classes <- function(int_vector, class_df){
                      direction = sign(sum(int_vector[1:l])),
                      value = vec_to_value(int_vector[1:l]),
                      start = 1,
-                     end = l,
-                     stringsAsFactors = F)
+                     end = l)
     return(prefix)
   }
   events <- int_span(class_df$start, class_df$end)
@@ -523,6 +535,7 @@ normalize <- function(data){
 
 find_classes <- function(int_vector, debug = F){
   if(debug) cat("Testing", paste(int_vector, collapse = ","), "\n")
+  browser()
   repetitions <- find_repetitions(int_vector)
   #print(repetitions)
   scales <- find_scales(int_vector)
@@ -694,7 +707,7 @@ fuse_row_pair <- function(data, row_index){
 
 resolve_row_pair <- function(data, row_index){
   #browser()
-  if(row_index <1 || row_index > nrow(data)){
+  if(row_index < 1 || row_index > nrow(data)){
     stop("Invalid row index")
   }
   #pat1 <- data[row_index,]$pattern
@@ -1005,9 +1018,10 @@ find_wba_by_phrase <- function(data, id = NULL){
   }
   phrases <- unique(data$phrase_id)
   ret <- list()
+  int_col <- ifelse("int" %in% names(data), "int", "int_raw")
   for(i in phrases){
     #print(sprintf("Checking phrase %d", i))
-    int_vector <- data[data$phrase_id == i,]$int_raw %>% na.omit()
+    int_vector <- data[data$phrase_id == i, ] %>% pull(!!int_col) %>% na.omit()
     #ignore last interval because it belongs to next phrase
     tmp <- find_wba(int_vector[1:(length(int_vector)-1)])
     tmp$phrase_id <- i
