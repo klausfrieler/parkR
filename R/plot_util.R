@@ -25,7 +25,7 @@ basic_theme <- "minimal"
 nice_cdpcx <- function(cdpcx_values){
   #Order and re-label raw CDPCX values for display
   cdpcx_values <- factor(cdpcx_values,
-                         levels = c("1", "2", "3", "4", "5", "6", "7", "B", "L", "T", "<", ">", "-", "%"),
+                         levels = c("1", "2", "3", "4", "5", "6", "7", "B", "L", "T", "<", ">", "-", "%", "*"),
                          labels = parkR::labels$cdpcx_labels
                          )
   return(cdpcx_values)
@@ -362,7 +362,7 @@ pc_hist <- function(data, id = NULL, percentage = T, fill_var = NULL, pc_col = "
   q <- ggplot(tmp, aes(x = factor(!!sym(pc_col), levels = 0:11)))
   q <- add_geom_bar(q, percentage = percentage, fill_var = fill_var)
   q <- q + get_default_theme() + theme(legend.position = "none")
-  q <- q + scale_x_discrete(name = "Pitch Class", drop = FALSE, labels = labels[["pc_labels"]])
+  q <- q + scale_x_discrete(name = "Pitch Class", drop = FALSE, labels = parkR::labels[["pc_labels"]])
   q
 }
 

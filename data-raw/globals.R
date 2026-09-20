@@ -26,9 +26,9 @@ jazzomat_gold <-"lightgoldenrod4"
 jazzomat_blue <-"aquamarine4"
 
 jazzomat_palette  <- list(
-  set1 = c(default_color, default_color2, default_color3, default_color4),
-  set2 = c(default_color, default_color2, default_color2, default_color),
-  set3 = c(default_color,jazzomat_red, default_color2, default_color)
+  set1 = c(default_color1, default_color2, default_color3, default_color4),
+  set2 = c(default_color1, default_color2, default_color2, default_color1),
+  set3 = c(default_color1, jazzomat_red, default_color2, default_color1)
 )
 usethis::use_data(jazzomat_palette, overwrite = T)
 
@@ -45,17 +45,22 @@ labels <- list(
   sub_ideas = c("rhythm-single-irregular","lick","lick","line-wavy-ascending","melody","lick","lick","rhythm-single-irregular","line-wavy-descending","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-tick-rabble","line-descending","line-wavy-descending","line-tick-slide","rhythm-single-irregular","line-descending","line-wavy-ascending","melody","line-wavy-descending","line-wavy-ascending","line-wavy-concave","melody","line-wavy-convex","fragment","line-wavy-horizontal","line-wavy-ascending","expressive","melody","expressive","line-wavy-descending","line-ascending","lick","rhythm-multi-regular","rhythm-multi-regular","line-wavy-ascending","line-descending","line-wavy-descending","rhythm-multi-regular","rhythm-multi-regular","rhythm-multi-regular","rhythm-multi-regular","line-wavy-descending","line-wavy-ascending","expressive","line-wavy-horizontal","line-wavy-descending","line-wavy-ascending","expressive","expressive","melody","line-wavy-horizontal","expressive"),
   parsons_labels = c("Down", "Repeat", "Up"),
   cdpc_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10"),
-  cdpcx_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10", "b9", "b13"),
+  cdpcx_labels = c("1", "2", "3", "4", "5", "6", "7", "#9", "#7", "#11",  "b7", "#10", "b9", "b13", "#5"),
   contour_labels =  c("Ascending", "Ascending-Horizontal", "Concave", "Convex", "Descending", "Descending-Horizontal", "Horizontal", "Horizontal-Ascending", "Horizontal-Descending"),
   redcontour_labels =  c("Ascending", "Descending",  "Convex", "Concave",  "Horizontal")
 
 )
 MIDI_labels <- NULL
 MIDI_reduced_labels <- NULL
+make_octave <- function(i){
+  rep("", 12)
+}
+
 for (i in -1:10){
   MIDI_labels <- c(MIDI_labels, make_octave(i))
   MIDI_reduced_labels <- c(MIDI_reduced_labels, make_octave(i))
 }
+
 MIDI_labels[8 + 0:11 * 12] <- paste("G", -1:10, sep="")
 MIDI_labels[3 + 0:11 * 12] <- paste("D", -1:10, sep="")
 MIDI_labels[5 + 0:11 * 12] <- paste("E", -1:10, sep="")
@@ -71,7 +76,7 @@ MIDI_full[7 + 0:11*12] <- paste("Gb", -1:10, sep="")
 MIDI_full[11 + 0:11*12] <- paste("Bb", -1:10, sep="")
 #MIDI_full[12 + 0:11*12]<-paste("B", -1:10, sep="")
 
-MIDI_reduced_labels[8 + 0:11*12] <- paste("G", -1:10, sep="")
+MIDI_reduced_labels[8 + 0:11 * 12] <- paste("G", -1:10, sep="")
 MIDI_full <- MIDI_full[2:length(MIDI_full)]
 MIDI_reduced_labels <- MIDI_reduced_labels[2:length(MIDI_reduced_labels)]
 
