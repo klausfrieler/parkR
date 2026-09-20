@@ -64,7 +64,7 @@ MIDI_labels[10 + 0:11 * 12] <- paste("A", -1:10, sep="")
 MIDI_labels[12 + 0:11 * 12] <- paste("B", -1:10, sep="")
 
 MIDI_full <- MIDI_labels
-MIDI_full[9 + 0:11*12] <- paste("Ab", -1:10, sep="")
+MIDI_full[9 + 0:11*12] <- paste("Ab", -1:10, sep="")bigram_s
 MIDI_full[2 + 0:11*12] <- paste("Db", -1:10, sep="")
 MIDI_full[4 + 0:11*12] <- paste("Eb", -1:10, sep="")
 MIDI_full[7 + 0:11*12] <- paste("Gb", -1:10, sep="")
