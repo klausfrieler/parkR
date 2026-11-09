@@ -31,6 +31,7 @@ export(get_cdpcx)
 export(get_format)
 export(get_ngrams_from_vector)
 export(get_scale_degree_code)
+export(get_tabr_note)
 export(get_value_context)
 export(ggassoc)
 export(ggassoc2)
@@ -80,15 +81,19 @@ import(stringr)
 import(tibble)
 import(tidyr)
 importFrom(furrr,future_map_dfr)
-importFrom(httr,GET)
-importFrom(httr,POST)
-importFrom(httr,http_error)
-importFrom(httr,modify_url)
+importFrom(httr,
+  GET,
+  POST,
+  http_error,
+  modify_url
+)
 importFrom(jsonlite,fromJSON)
 importFrom(stats,chisq.test)
-importFrom(tabr,as_music)
-importFrom(tabr,p)
-importFrom(tabr,score)
-importFrom(tabr,tab)
-importFrom(tabr,track)
+importFrom(tabr,
+  as_music,
+  p,
+  score,
+  tab,
+  track
+)
 importFrom(utils,write.table)

@@ -36,4 +36,4 @@ Suggests:
     devtools (>= 1.13.6)
 Remotes:
     klausfrieler/jazzodata
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.1.0

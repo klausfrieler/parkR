@@ -33,6 +33,7 @@ jazzomat_palette  <- list(
 usethis::use_data(jazzomat_palette, overwrite = T)
 
 
+#' @export
 labels <- list(
   cpc_labels = c("1", "b9", "9", "b3", "3", "11", "#11/b5", "5", "b13", "13", "7", "j7", "NA"),
   durclass_labels = c("Very Short", "Short", "Medium", "Long", "Very Long"),

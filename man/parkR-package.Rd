@@ -19,5 +19,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Klaus Frieler \email{klaus.frieler@ae.mpg.de}
 
+Authors:
+\itemize{
+  \item Klaus Frieler \email{klaus.frieler@ae.mpg.de}
+}
+
 }
 \keyword{internal}
