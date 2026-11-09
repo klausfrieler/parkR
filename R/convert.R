@@ -207,7 +207,13 @@ get_octave_str <- Vectorize(
     paste(ret, collapse = "")
   }
 )
-
+#' get_tabr_note
+#'
+#' This function converts MIDI pitches to tabr pitches
+#'
+#' @param midi_pitch (integer) (vector of) MIDI pitches
+#' @param flat (boolean) use flat pitches by default or not
+#' @export
 get_tabr_note <- Vectorize(function(midi_pitch, flat = T){
   if(midi_pitch < 0 ){
     return("r")
