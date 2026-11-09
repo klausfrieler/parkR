@@ -193,7 +193,7 @@ get_octave_str <- Vectorize(
     if(midi_pitch < 0 ){
       return("")
     }
-    oct <- floor((midi_pitch - 60)/12)
+    oct <- floor((midi_pitch - 48)/12)
     if(oct < 0){
       ret <- rep(",", abs(oct))
     }
