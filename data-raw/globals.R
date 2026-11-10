@@ -62,6 +62,7 @@ for (i in -1:10){
   MIDI_reduced_labels <- c(MIDI_reduced_labels, make_octave(i))
 }
 
+MIDI_labels[1 + 0:11 * 12] <- paste("C", -1:10, sep="")
 MIDI_labels[8 + 0:11 * 12] <- paste("G", -1:10, sep="")
 MIDI_labels[3 + 0:11 * 12] <- paste("D", -1:10, sep="")
 MIDI_labels[5 + 0:11 * 12] <- paste("E", -1:10, sep="")
